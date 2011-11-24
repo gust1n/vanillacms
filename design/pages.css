@@ -1,0 +1,11 @@
+a.ParentPage,
+a:link.ParentPage {
+  font-weight:bold;
+}
+table a.EditButton {
+   display:none;
+   margin-left:10px;
+}
+table#PageTable tr:hover td{
+   background:#ffe;
+}

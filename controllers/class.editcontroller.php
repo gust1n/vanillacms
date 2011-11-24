@@ -1,0 +1,415 @@
+<?php if (!defined('APPLICATION')) exit();
+
+/**
+* Settings Controller
+*/
+class EditController extends Gdn_Controller {
+
+   public $Uses = array('Database', 'Form', 'PageModel');
+   public function Initialize() {
+      $this->Head = new HeadModule($this);
+      $this->AddJsFile('jquery.js');
+      $this->AddJsFile('jquery.livequery.js');
+      $this->AddJsFile('jquery.form.js');
+      $this->AddJsFile('jquery.popup.js');
+      $this->AddJsFile('jquery.gardenhandleajaxform.js');
+      $this->AddJsFile('global.js');
+      $this->AddJsFile('settings.js');
+
+
+         $this->AddCssFile('admin.css');
+      
+
+      $this->MasterView = 'admin';
+      parent::Initialize();
+   }
+   public function AddSideMenu($CurrentUrl) {
+      // Only add to the assets if this is not a view-only request
+      if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
+         $SideMenu = new SideMenuModule($this);
+         $SideMenu->HtmlId = '';
+         $SideMenu->HighlightRoute($CurrentUrl);
+         $this->EventArguments['SideMenu'] = &$SideMenu;
+         $this->FireEvent('GetAppSettingsMenuItems');
+         $this->AddModule($SideMenu, 'Panel');
+      }
+   }
+   public function Pages($Filter = 'all')
+   {      
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $this->AddSideMenu('edit/pages');
+      $this->AddJsFile('js/library/jquery.tablednd.js');
+      $this->AddJsFile('pages.js');
+      $this->AddCssFile('pages.css');
+      $this->Title(T('Pages'));
+
+      $this->Filter = $Filter;
+      
+      $this->AllParents = $this->PageModel->GetAllParents($Filter);
+
+      $this->Pages = $this->AllParents->Result(DATASET_TYPE_ARRAY); 
+      
+      $PublishedCount = 0;
+      $UnpublishedCount = 0;
+      
+      $i = 0;
+      foreach ($this->Pages as $Parent) {
+         if ($Parent['Status'] == 'published') {
+            $PublishedCount++;
+         } else {
+            $UnpublishedCount++;
+         }
+         $Children = $this->PageModel->GetAllChildren($Parent['PageID']);
+         foreach ($Children->Result() as $Child) {
+            $this->Pages[$i]['Children'][$Child->PageID] = $Child;
+            
+            if ($Child->Status == 'published') {
+               $PublishedCount++;
+            } else {
+               $UnpublishedCount++;
+            }
+         }
+         unset($Children); 
+         $i++;
+      }
+      
+      $this->PublishedCount = $PublishedCount;
+      $this->UnpublishedCount = $UnpublishedCount;
+         
+      $this->Render();
+   }
+   public function AddPage() {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $this->Title(T('Add Page'));
+      // Use the edit form with no MessageID specified.
+      $this->View = 'editpage';
+      $this->EditPage();
+   }
+   public function Add($Type = 'page')
+   {
+      $this->View = 'index';
+      $this->Index(null, 'page');
+   }
+   public function Index($PageID = '', $Type = '') {
+      $this->MasterView = 'editpage';
+      $this->AddSideMenu('edit/pages');
+
+      $this->AddCssFile('editpage.css');
+
+      //$this->AddJsFile('/js/library/jquery.ui.packed.js');
+
+      $this->AddJsFile('applications/vanillacms/js/ckeditor/ckeditor.js', 'VanillaCMS');
+      $this->AddJsFile('applications/vanillacms/js/ckeditor/adapters/jquery.js');
+      
+      $this->AddJsFile('jquery.alphanumeric.js');
+      $this->AddJsFile('jquery.autogrow.js');
+      $this->AddJsFile('pages.js');
+
+      //$this->View = 'editpage';
+      $this->Page = FALSE;
+
+      // Set the model on the form.
+      $this->Form->SetModel($this->PageModel);
+
+      // If were not adding, but editing an existing page
+      if (is_numeric($PageID) && $PageID > 0) { 
+         if ($this->Page = $this->PageModel->GetByID($PageID)) { //If page exists
+            $this->Permission('VanillaCMS.Pages.Manage');
+            $this->Title(T('Edit Page'));
+            $this->Form->AddHidden('PageID', $this->Page->PageID);
+            
+            //Set PageMeta
+            $this->PageMetaData = $this->PageModel->GetPageMeta($this->Page->PageID);
+            
+         } else {
+            Redirect('dashboard/home/filenotfound');
+         }        
+      } else {
+         $this->Form->AddHidden('Type', $Type);
+         $this->SetData('Type', $this->Type = $Type, TRUE);
+      }
+
+      // If seeing the form for the first time...
+      if ($this->Form->AuthenticatedPostBack() === FALSE) {
+
+         $this->Form->AddHidden('CodeIsDefined', '0'); //For the urlcode autofunction
+
+         if($this->Page) { //Set the form for editing existing page
+            $this->Form->SetData($this->Page);
+         }	
+
+      } 
+      else { //If saving
+         $this->DeliveryType(DELIVERY_TYPE_BOOL);
+         $this->Validation = new Gdn_Validation();	
+
+       //  if($this->ValidateUniqueUrlCode($this->Form->GetFormValue('UrlCode')))
+         //   echo "Urlkoden måste vara unik";//$this->Form->AddError('ErrorCredentials');
+
+         
+         if ($PageID = $this->Form->Save()) { //Successful save
+            //PAGEMETA
+            $this->PageModel->ClearPageMeta($PageID);
+            if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
+               foreach ($MetaArray as $Key => $Meta) {
+                  $ExplodedMeta = explode('|', $Meta);
+                  $SingleMeta = array();
+                  $SingleMeta['MetaKey'] = $ExplodedMeta[0];
+                  $SingleMeta['MetaKeyName'] = $ExplodedMeta[1];
+                  $SingleMeta['MetaValue'] = $ExplodedMeta[2];
+                  $SingleMeta['MetaAsset'] = $ExplodedMeta[3];
+                  $SingleMeta['MetaAssetName'] = $ExplodedMeta[4];
+                  
+                  echo $SingleMeta['MetaValue'];
+                  
+                  
+                  $NewArray[$ExplodedMeta[0]] = $SingleMeta;
+               }
+            }
+            if (isset($NewArray)) {
+               $this->PageModel->AddPageMeta($PageID, $NewArray);
+            }
+            
+            //ROUTES
+            if (isset($this->Page->RouteIndex))
+               $this->PageModel->DeleteRoute($PageID); //Always delete route in case UrlCode is changed
+               
+            $this->PageModel->SetRoute($PageID); //Auto set route to get rid of /page prefix
+            
+            //PERMISSIONS
+            
+            
+            $PermissionModel = Gdn::PermissionModel();
+                                    $Permissions = $PermissionModel->PivotPermissions(GetValue('Permission', $this->Form->FormValues(), array()), array('JunctionID' => $PageID));
+                                    $PermissionModel->SaveAll($Permissions, array('JunctionID' => $PageID, 'JunctionTable' => 'Page'));
+            
+                                   
+            //$Sender->SQL->Put('User', array('Permissions' => ''), array('Permissions <>' => ''));
+            
+            //Page Status (detect which button clicked)
+            if ($this->Form->GetFormValue('Status') == 'published') {
+               $this->StatusMessage = T('Page published at') .' ' . Gdn_Format::Date(); 
+            } elseif ($this->Form->GetFormValue('Status') == 'draft') {
+               $this->StatusMessage = T('Page saved as draft at') .' '. Gdn_Format::Date(); 
+            }
+            
+            
+            if (!$this->Form->GetFormValue('PageID')) { //If new page, redirect
+               //$this->RedirectUrl = '../edit/pages';
+               $this->RedirectUrl = Url('/edit/' . $PageID);
+            }
+            
+                   
+         }
+      }
+      
+      //Set available Parent pages
+      $this->PagesData = $this->PageModel->GetParentsOnly();
+
+      if(property_exists($this, 'PagesData')) {
+         $this->ParentPagesOptions = array();
+         $this->ParentPagesOptions[0] = T('None');
+         foreach ($this->PagesData->Result() as $Page) {
+            $this->ParentPagesOptions[$Page->PageID] = $Page->Name;
+         }
+      }
+      
+      //Render array with available meta keys
+      $this->AvailableMetaKeys = $this->_AvailableMetaKeys();
+      
+      //Render array with available modules
+      $this->AvailableModules = $this->_AvailableModules();
+
+      
+      //Render array with available assets
+      $this->AvailableAssets = $this->_AvailableAssets();
+      
+      //Render array with possible templates
+      $this->TemplateOptions = $this->_AvailableTemplates();
+      if (!isset($this->TemplateOptions)) {
+         $this->TemplateOptions = array(
+            '' => T('No templates available')
+         );
+          
+      }
+      
+      //Get default permissions
+      $PermissionModel = Gdn::PermissionModel();
+      $Permissions = $PermissionModel->GetJunctionPermissions(array('JunctionID' => isset($this->Page->PageID) ? $this->Page->PageID : 0), 'Page');
+		$Permissions = $PermissionModel->UnpivotPermissions($Permissions, TRUE);
+	   //print_r($Permissions);
+      //return;
+      $this->SetData('PermissionData', $Permissions, TRUE);
+
+      $this->Render();
+   }
+   
+   private function _ValidateUniqueUrlCode($UrlCode) {
+      $Valid = FALSE;
+
+      $TestData = $this->PageModel->GetPublishedByUrlCode($UrlCode);
+      if ($TestData) {
+        // $this->Validation->AddValidationResult('Name', 'The name you entered is already in use by another member.');
+         $Valid = TRUE;
+      }
+
+      return $Valid;
+   }
+   
+   private function _AvailableTemplates($GetPlugin = NULL, $ForceReindex = FALSE) {
+         $AvailableTemplates = array();
+  
+         $Info = array();
+         $InverseRelation = array();
+         if ($FolderHandle = opendir(PATH_VanillaCMSS . DS . $this->VanillaCMS . DS . 'views')) {
+            if ($FolderHandle === FALSE)
+               return $Info;
+            
+            // Loop through subfolders (ie. the actual plugin folders)
+            while (($Item = readdir($FolderHandle)) !== FALSE) {   
+               if (in_array($Item, array('.', '..')))
+                  continue;        
+               $Name = substr($Item,0,-11 );
+               $AvailableTemplates[$Name] = $Name;
+            }
+            closedir($FolderHandle);
+            
+            return $AvailableTemplates;
+         }
+   }
+   
+   /**
+    * Returns available meta info fields for Custom Fields
+    *
+    * @todo Render dynamically instead of this crappy hard-coded solution
+    */
+   private function _AvailableMetaKeys()
+   {
+      /*
+         TODO Render dynamically
+      */
+      return array(
+      'MetaDescription' => T('Meta Description'),
+      'MetaKeywords' => T('Meta Keywords'),
+      'CustomCss' => T('Custom CSS') 
+      );
+   }
+   
+   private function _AvailableModules() {
+      $AvailableModules = array();
+
+      $Info = array();
+      if ($FolderHandle = opendir(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'modules')) {
+         if ($FolderHandle === FALSE)
+            return $Info;
+
+         // Loop through subfolders (ie. the actual plugin folders)
+         while (($Item = readdir($FolderHandle)) !== FALSE) {   
+            if (in_array($Item, array('.', '..')))
+               continue;        
+
+            $ModuleFile = PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'modules' . DS . $Item;
+            $ModuleName = $this->_ScanModule($ModuleFile);
+
+            $Name = substr($Item,6,-4 );
+            //$AvailableModules = array();
+
+            //T(substr($Name,0,-6));
+            
+            $UpdateModel = new UpdateModel;
+            $InfoArray = $UpdateModel::ParseInfoArray($ModuleFile, 'ModuleInfo');
+            
+            $AvailableModules[$ModuleName] = $InfoArray[$ModuleName];
+            
+            
+            /*
+            echo '<pre>';            
+                                                print_r($InfoArray[$ModuleName]);
+                                                die('</pre>');*/
+            
+            
+            
+         }
+         closedir($FolderHandle);
+      }
+      
+      unset($AvailableModules['HeaderModule']);
+      unset($AvailableModules['FooterModule']);
+      unset($AvailableModules['ShareModule']);
+      unset($AvailableModules['DiscussPageModule']);
+      
+      /*
+      echo '<pre>';            
+                        print_r($AvailableModules);
+                        die('</pre>');*/
+      
+      
+      return $AvailableModules;
+   }
+   private function _ScanModule($ModuleFile) {
+      // Find the $PluginInfo array
+      $Lines = file($ModuleFile);
+
+      foreach ($Lines as $Line) {
+
+         if (strtolower(substr(trim($Line), 0, 6)) == 'class ') {
+            $Parts = explode(' ', $Line);
+            //if (count($Parts) > 2)
+            $ClassName = $Parts[1];
+            break;
+         }
+
+      }
+      unset($Lines);      
+      return $ClassName;
+   }
+   /**
+    * Returns available assets for placing stuff in
+    *
+    * @todo Render dynamically instead of this crappy hard-coded solution
+    */
+   private function _AvailableAssets()
+   {
+
+      return array(
+         'Quote' => T('QuoteAsset'),
+         'FullWidth' => T('Full Width'),
+         'Content' => T('Content'),
+         'AfterContent' => T('After Content'),
+         'Panel' => T('Panel'),
+         'Box1' => T('Box1'),
+         'Box2' => T('Box2'),
+         'Box3' => T('Box3')  
+      );
+   }
+   /**
+    * Publishes, unpablishes (sets as draft) or deletes page
+    *
+    * @return void
+    * @author Jocke Gustin
+    **/
+   public function Status($PageID = '', $Status = 'published', $TransientKey = FALSE) {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $this->DeliveryType(DELIVERY_TYPE_BOOL);
+      $Session = Gdn::Session();
+
+      if ($TransientKey !== FALSE && $Session->ValidateTransientKey($TransientKey)) {
+         if ($Status == 'published' || $Status == 'draft' || $Status == 'deleted') {
+            $this->PageModel->Status($PageID, $Status);
+            if ($Status == 'draft') {
+               $this->PageModel->DeleteRoute($PageID);
+               $this->StatusMessage = 'Page unpublished and saved as draft';
+            } elseif ($Status == 'deleted') {
+               $this->PageModel->DeleteRoute($PageID);
+               
+            }
+            elseif ($Status == 'published') {
+               $this->PageModel->SetRoute($PageID);
+               $this->StatusMessage = 'Page Published';
+            }	
+         }	
+      }
+
+      $this->Render();      
+   }
+}

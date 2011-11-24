@@ -1,0 +1,196 @@
+
+.clear:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+.clear {
+  display: inline-block;
+}
+ 
+html[xmlns] .clear {
+  display: block;
+}
+
+* html .clear {
+  height: 1%;
+}
+
+label {width:220px;font-weight:bold;float:left;}
+label.CheckBoxLabel { width:220px;float:none;}
+div.Errors {
+  margin-left:200px;
+}
+Input.CustomCss{
+  width:99%;
+}
+#Content {
+	margin:0;
+	min-height:500px;
+	margin-right:250px;
+	margin-left:187px;
+  border:none;
+}
+#MainContent {
+  margin-left:20px;
+}
+label {
+  font-weight:bold;
+}
+#Panel2 {
+	float:right;
+	width:250px;
+}
+#Panel2 span.Publish {
+   font-weight:bold;
+}
+.Box input.Draft {
+  background:#850000;
+  color:#fff;
+  text-shadow:none;
+  border-color:black;
+}
+.VanillaCMS h1#MainHeader {
+  border-right:1px solid #8BC1DE;
+  border-left:1px solid #8BC1DE;
+  margin-bottom:5px;
+}
+#Panel2 div.Box.Info {
+  background:#ffd;
+  border-color:#000;
+}
+	#Panel2 div.Box {
+		-moz-border-radius: 1px;
+		-webkit-border-radius: 1px;
+		background: #cfecff;
+		background: #D3F0FF;
+		color: #333;
+		padding:15px;
+		margin: 0 0 10px;
+		border: 1px solid #A5D0E7;
+	}
+	#Panel2 table {
+	  border:0;
+	}
+	#Panel2 table tbody tr td {
+	  padding:0;
+	}
+	#Panel2 ul li {
+	  margin-bottom:0;
+	}
+	#Panel2 .TinyProgress {
+	   position: absolute;
+      right: 0px;
+      top: 0px;
+	}
+.PromtText{
+    position:absolute;
+    color:#ccc;
+    font-weight:normal;
+}
+#NamePromtText {
+  font-size:22px;
+  padding:2px 0 2px 4px;
+  display:none;
+}
+#ParentOnly {
+  float:right;
+  font-weight:none;
+}
+#QuotePromtText {
+  font-size:16px;
+  padding:7px 0 2px 4px;
+}
+input.PageName {
+	font-size:22px;
+	margin:0;
+	width:30%;
+	float:left;
+	margin-bottom:5px;
+}
+input.Quote {
+	font-size:16px;
+	float:left;
+	margin:0;
+
+	width:70%;
+	margin:5px 0;
+}
+div#UrlCode {
+   float:left;
+   	margin-top:8px;
+   	margin-left:5px;
+}
+input.UrlCode {
+	background:none;
+	border:0;
+	font-size:14px;
+	width:60%;
+	clear:right;
+}
+a.DeleteMeta {
+   margin-left:5px;
+   color:red;
+}
+.AssetShowHide {
+   display:none;
+}
+a.DeleteMeta:hover {
+   color:#850000;
+}
+.EnabledBox label {
+	float:right;
+	width:100px;
+}
+.EnabledBox {
+	margin-bottom:10px;
+	float:left;
+}
+.Alert {
+		font-weight:bold;
+}
+#Panel2 div.Box.Info input.Button {
+   margin-top:5px;
+}
+input.SaveButton {
+   float:right;
+}
+a.UnpublishMessage {
+   font-weight:normal;
+   margin-left:5px;
+   text-decoration:underline;
+}
+#Panel ul.PanelInfo li {
+   margin-bottom: 0;
+}
+body div.Errors ul li {
+color: black;
+font-size: 12px;
+text-shadow: none;
+}
+table#Permissions thead tr th {
+   padding-left:5px;
+}
+table#Permissions tbody tr td {
+   text-align:center;
+}
+table#Permissions tbody tr td.RoleName {
+   text-align:left;
+   font-weight:bold;
+}
+div.PostMeta {
+   padding:10px;
+   margin-top:20px;
+}
+div.PostMeta tr {
+   border: 1px solid #A5D0E7;
+}
+table#MetaList {
+   margin-bottom:10px;
+}
+.HoverHelp {
+   text-shadow:none;
+}

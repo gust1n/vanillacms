@@ -1,0 +1,16 @@
+#RecentDiscussions div.RecentDiscussion {
+	border-bottom:1px solid #ccc;
+}
+
+/*NewsModule*/
+.NewsPost {
+   border-bottom: 1px solid #ccc;
+}
+
+/*Contact Form module */
+#Form_EmailForm {
+   background:#eee;
+   width:350px;
+   border:1px solid #ccc;
+}
+.EmailWidth, input.EmailWidth {width:341px;}

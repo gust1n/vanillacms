@@ -1,0 +1,19 @@
+#Menu li ul{
+   width: 220px;
+   visibility: hidden;
+   position: absolute;
+   top: 100%;
+   left: 0;
+   z-index:100;
+}
+#AfterContent{
+   margin-top:70px;
+}
+/*Sidebar Menu*/
+.Page .PanelInfo li {
+   text-align:left;
+}
+.Page .PanelInfo li a {
+float: none;
+
+}
