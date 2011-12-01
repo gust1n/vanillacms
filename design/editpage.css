@@ -36,6 +36,8 @@ Input.CustomCss{
 }
 #MainContent {
   margin-left:20px;
+  margin-top: 7px;
+  padding-right: 7px;
 }
 label {
   font-weight:bold;
