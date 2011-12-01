@@ -194,13 +194,13 @@ jQuery(document).ready(function($) {
    $("#Form_UrlCode").focus(function() {
       $('#Form_CodeIsDefined').val('1');
    });
-   $('#UrlCode input, #UrlCode a.Save').hide();
+   $('#UrlCode input, #UrlCode a.SaveUrlCode').hide();
    if ($('#UrlCode input').val() == '') {
       $('#UrlCode').hide();
    }
    
    // Reveal input when "change" button is clicked
-   $('#UrlCode a, #UrlCode span').click(function() {
+   $('#UrlCode a.UrlToggle, #UrlCode span').click(function() {
       $('#UrlCode').find('input,span,a').toggle();
       $('#UrlCode span').text($('#UrlCode input').val());
       $('#UrlCode input').focus();

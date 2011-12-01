@@ -61,8 +61,9 @@ echo Gdn::Request()->Url('&nbsp;', TRUE);
 
 echo Wrap($this->Form->GetValue('UrlCode'));
 echo $this->Form->TextBox('UrlCode');
-echo Anchor(T('edit'), '#', 'Edit');
-echo Anchor(T('OK'), '#', 'Save SmallButton');
+echo Anchor(T('edit'), '#', 'EditUrlCode UrlToggle');
+echo Anchor(T('OK'), '#', 'SaveUrlCode SmallButton UrlToggle');
+echo Anchor(T('visit'), Gdn::Request()->Url($this->Page->UrlCode, TRUE), 'VisitLink', array('target' => '_blank'));
 echo '</div></div><div class="ParentNotOptional">';		
 
 
