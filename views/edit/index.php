@@ -14,28 +14,13 @@ foreach ($this->AvailableModules as $key => $value) {
 setcookie("admin", "1", time()+3600, '/');
 if (is_object($this->Page)) {
 	$HeaderText = T('Edit') . ': ' . $this->Page->Name;
-	echo '<style type="text/css">.PromtText{display:none}</style>';
-
-	
-	if ($this->Page->IsParentOnly == 1) {
-	   echo "<script type='text/javascript'>jQuery(document).ready(function($) {
-	     $('.ParentNotOptional').hide();
-	   });
-	   </script>";
-	   
-	    
-	  }
-	
+	echo '<style type="text/css">.PromtText{display:none}</style>';	
 } else {
    $HeaderText = T('Add '. $this->Type);
    echo "<script type='text/javascript'>jQuery(document).ready(function($) { $('#Form_Permission').attr('checked', true); });</script>";
 }		
 ?>
-<h1 id="MainHeader"><?php 
-   echo $HeaderText; 
-   //Parent only
-   echo '<span id="ParentOnly">' . $this->Form->CheckBox('IsParentOnly', HoverHelp(T('Parent Page'), T('Parent Page means that this is JUST a parent page and has no content of its own')), array('value' => '1')) . '</span>';
-?></h1>
+<h1 id="MainHeader"><?php echo $HeaderText; ?></h1>
 
 <?php
 echo '<div id="MainContent"><label id="NamePromtText" class="PromtText" for="Form_Name">'.T('Enter page name...').'</label><div style="width:100%;height:50px">';
@@ -186,15 +171,41 @@ $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="draft" value="'.T('S
 $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="published" value="'.$ButtonText.'" class="Button SaveButton">';
 //$ToPanel .= $this->Form->Button($ButtonText, array('class' => 'Button SaveButton', 'type' => 'submit'));
 $ToPanel .= '</div>';
-
 $ToPanel .= '<div class="Box" id="PageAttributes"><h2>' . T('Page Options (optional)') . '</h2>';
-
 $ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<div class="ParentNotOptional"><ul><li>';
 $ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Discussion'), array('value' => '1')) . '</li><li>';
-//$ToPanel .= $this->Form->CheckBox('Share', T('Share panel'), array('value' => '1')) . '</li><li>';
+$ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="0">';
+$ToPanel .= '<option value="0">'.T('None').'</option>';            
+foreach ($this->ParentPagesOptions as $ParentPage) {   
+   $attr = '';
+   if ($this->Page->PageID == $ParentPage['ParentPageID']) {
+      $attr = 'selected = "selected"';
+   }
+   $ToPanel .= '<option value="'.$ParentPage['PageID'].'" '.$attr.'>'.$ParentPage['Name'].'</option>';  
 
-$ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . $this->Form->Dropdown('ParentPageID', $this->ParentPagesOptions, array('default' => '0')) . '</li><li>';
+   foreach ($ParentPage['Children'] as $Child) {
+      $attr = '';
+      if ($this->Page->ParentPageID == $Child->ParentPageID) {
+         $attr = 'selected = "selected"';
+      }
+      
+      $ToPanel .= '<option value="'.$Child->PageID.'" class="level-1" '.$attr.'>&nbsp;&nbsp;&nbsp;'.$Child->Name.'</option>';
+   }  
+}
+$ToPanel .= '</select>';
+            //$this->Form->Dropdown('ParentPageID', , array('default' => '0', 'IncludeNull' => true)) . 
+$ToPanel .= '</li><li>';
 
+         
+         /*
+         <option value=""></option>
+                  <option value="0">None</option>
+                  <option value="1" selected="selected">test</option>
+                  <option value="2">Undersida</option>
+                  <option value="3">Undersida 2</option>
+                  <option value="4">Om oss</option>
+                  </select>*/
+         
 
 //$ToPanel .= $this->Form->Label('Associate Discussion', 'DiscussionID') . $this->Form->Dropdown('DiscussionID', $this->DiscussionsOptions, array('default' => '0'));
 

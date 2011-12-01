@@ -204,14 +204,32 @@ class EditController extends Gdn_Controller {
       }
       
       //Set available Parent pages
-      $this->PagesData = $this->PageModel->GetParentsOnly();
+      /*
+      $this->AvailablePages = $this->PageModel->Get();
 
-      if(property_exists($this, 'PagesData')) {
-         $this->ParentPagesOptions = array();
-         $this->ParentPagesOptions[0] = T('None');
-         foreach ($this->PagesData->Result() as $Page) {
-            $this->ParentPagesOptions[$Page->PageID] = $Page->Name;
+            if(property_exists($this, 'AvailablePages')) {
+               $this->ParentPagesOptions = array();
+               $this->ParentPagesOptions[0]['Name'] = T('None');
+               foreach ($this->AvailablePages->Result() as $Page) {
+                  if ($this->Page->PageID != $Page->PageID) {
+                     $this->ParentPagesOptions[$Page->PageID]['Name'] = $Page->Name;
+                     $this->ParentPagesOptions[$Page->PageID]['ParentPageID'] = $Page->ParentPageID;
+                  }
+                  
+               }
+            }*/
+      
+      
+      $this->AllParents = $this->PageModel->GetAllParents();
+      $this->ParentPagesOptions = $this->AllParents->Result(DATASET_TYPE_ARRAY); 
+      $i = 0;
+      foreach ($this->ParentPagesOptions as $Parent) {
+         $Children = $this->PageModel->GetAllChildren($Parent['PageID']);
+         foreach ($Children->Result() as $Child) {
+            $this->ParentPagesOptions[$i]['Children'][$Child->PageID] = $Child;
          }
+         unset($Children); 
+         $i++;
       }
       
       //Render array with available meta keys

@@ -206,10 +206,6 @@ jQuery(document).ready(function($) {
       $('#UrlCode input').focus();
       return false;
    });
-
-   if ($('#Form_IsParentOnly').attr('checked')) {
-      $('#Permissions,#UrlCode').hide();
-   }
    
    //Hide the prompt text if input is clicked
    $("#Form_Name").click(function() {
@@ -225,15 +221,6 @@ jQuery(document).ready(function($) {
    if(!$("#Form_Quote").val()) {
       $("#QuotePromtText").show();
    }
-   
-   $('#Form_IsParentOnly').click(function() {
-      if ($(this).attr('checked')) {
-         $('.ParentNotOptional').slideUp('fast');
-      } else {
-         $('.ParentNotOptional').slideDown('fast');
-      }
-      
-   });
        
    $( 'textarea.Editor' ).ckeditor({
       customConfig : gdn.definition('WebRoot') + 'applications/vanillacms/js/ckeditor/config.js',   
