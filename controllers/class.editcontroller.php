@@ -53,6 +53,11 @@ class EditController extends Gdn_Controller {
       $UnpublishedCount = 0;
       
       $i = 0;
+      
+      /*
+         TODO Add new tree-view
+      */
+      
       foreach ($this->Pages as $Parent) {
          if ($Parent['Status'] == 'published') {
             $PublishedCount++;
@@ -148,6 +153,10 @@ class EditController extends Gdn_Controller {
 
          
          if ($PageID = $this->Form->Save()) { //Successful save
+            
+            //Rebuild the PageTree
+            $this->PageModel->RebuildTree();
+            
             //PAGEMETA
             $this->PageModel->ClearPageMeta($PageID);
             if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
@@ -202,35 +211,9 @@ class EditController extends Gdn_Controller {
                    
          }
       }
-      
-      //Set available Parent pages
-      /*
-      $this->AvailablePages = $this->PageModel->Get();
-
-            if(property_exists($this, 'AvailablePages')) {
-               $this->ParentPagesOptions = array();
-               $this->ParentPagesOptions[0]['Name'] = T('None');
-               foreach ($this->AvailablePages->Result() as $Page) {
-                  if ($this->Page->PageID != $Page->PageID) {
-                     $this->ParentPagesOptions[$Page->PageID]['Name'] = $Page->Name;
-                     $this->ParentPagesOptions[$Page->PageID]['ParentPageID'] = $Page->ParentPageID;
-                  }
-                  
-               }
-            }*/
-      
-      
-      $this->AllParents = $this->PageModel->GetAllParents();
-      $this->ParentPagesOptions = $this->AllParents->Result(DATASET_TYPE_ARRAY); 
-      $i = 0;
-      foreach ($this->ParentPagesOptions as $Parent) {
-         $Children = $this->PageModel->GetAllChildren($Parent['PageID']);
-         foreach ($Children->Result() as $Child) {
-            $this->ParentPagesOptions[$i]['Children'][$Child->PageID] = $Child;
-         }
-         unset($Children); 
-         $i++;
-      }
+            
+      //$this->PageModel->RebuildTree();
+      $this->ParentPagesOptions = $this->PageModel->Get();      
       
       //Render array with available meta keys
       $this->AvailableMetaKeys = $this->_AvailableMetaKeys();
@@ -262,35 +245,40 @@ class EditController extends Gdn_Controller {
       $this->Render();
    }
    
-   function dropdown_pages($args = '') {
-   	$defaults = array(
-   		'depth' => 0, 'ParentPageID' => 0,
-   		'selected' => 0, 'echo' => 1,
-   		'name' => 'page_id', 'id' => '',
-   		'show_option_none' => '', 'show_option_no_change' => '',
-   		'option_none_value' => ''
-   	);
+   function DropdownPages($args = '', $ShowEmpty = TRUE, $EmptyText = '', $echo = null) {
 
-   	$r = VanillaCMSController::parse_args( $args, $defaults );
-   	/*ÄR HÄR*/
-   	$pages = get_pages($r);
-   	$output = '';
-   	$name = esc_attr($name);
-   	// Back-compat with old system where both id and name were based on $name argument
-   	if ( empty($id) )
-   		$id = $name;
-
-   	if ( ! empty($pages) ) {
+   	$PagesQuery = $this->PageModel->Get();
+      $Pages = $PagesQuery->Result(DATASET_TYPE_ARRAY);
+      
+      die(print_r($Pages));
+      
+      $Pages = VanillaCMSController::PageTree($Pages);
+      
+      if ( ! empty($Pages) ) {
    		$output = "<select name=\"$name\" id=\"$id\">\n";
-   		if ( $show_option_no_change )
-   			$output .= "\t<option value=\"-1\">$show_option_no_change</option>";
-   		if ( $show_option_none )
-   			$output .= "\t<option value=\"" . esc_attr($option_none_value) . "\">$show_option_none</option>\n";
-   		$output .= walk_page_dropdown_tree($pages, $depth, $r);
+   		if ($ShowEmpty) {
+   		   $output .= "\t<option value=\"-1\">$EmptyText</option>";
+   		}
+
+   		//$output .= walk_page_dropdown_tree($pages, $depth, $r);
    		$output .= "</select>\n";
    	}
+   	
+   	echo '<pre>';
+   	print_r($Pages);
+   	echo '</pre>';
+   	//$pages = $this->PageModel->GetPagesJG();
+   	//$output = '';
 
-   	$output = apply_filters('wp_dropdown_pages', $output);
+   	//if ( ! empty($pages) ) {
+   	//	$output = "<select name=\"$name\" id=\"$id\">\n";
+   	//	if ( $show_option_no_change )
+   	//		$output .= "\t<option value=\"-1\">$show_option_no_change</option>";
+   	//	if ( $show_option_none )
+   	//		$output .= "\t<option value=\"" . esc_attr($option_none_value) . "\">$show_option_none</option>\n";
+   	//	$output .= walk_page_dropdown_tree($pages, $depth, $r);
+   	//	$output .= "</select>\n";
+   	//}
 
    	if ( $echo )
    		echo $output;

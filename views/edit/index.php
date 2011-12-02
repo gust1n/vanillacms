@@ -175,7 +175,8 @@ $ToPanel .= '<div class="Box" id="PageAttributes"><h2>' . T('Page Options (optio
 $ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<div class="ParentNotOptional"><ul><li>';
 $ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Discussion'), array('value' => '1')) . '</li><li>';
 $ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="0">';
-$ToPanel .= '<option value="0">'.T('None').'</option>';            
+$ToPanel .= '<option value="-1">'.T('None').'</option>';            
+/*
 foreach ($this->ParentPagesOptions as $ParentPage) {   
    $attr = '';
    if ($this->Page->PageID == $ParentPage['ParentPageID']) {
@@ -188,27 +189,76 @@ foreach ($this->ParentPagesOptions as $ParentPage) {
       if ($this->Page->ParentPageID == $Child->ParentPageID) {
          $attr = 'selected = "selected"';
       }
-      /*
-         TODO Fix proper select for children
-      */
       
       $ToPanel .= '<option value="'.$Child->PageID.'" class="level-1" '.$attr.'>&nbsp;&nbsp;&nbsp;'.$Child->Name.'</option>';
    }  
+}*/
+
+//$ToPanel .= '<ol class="Sortable">';
+
+$Right = array(); // Start with an empty $Right stack
+$LastRight = 0;
+$OpenCount = 0;
+$Loop = 0;
+
+foreach ($this->ParentPagesOptions->Result() as $Page) {
+   if ($Page->PageID > 0) {
+      // Only check stack if there is one
+      $CountRight = count($Right);
+      if ($CountRight > 0) {  
+         // Check if we should remove a node from the stack
+         while (array_key_exists($CountRight - 1, $Right) && $Right[$CountRight - 1] < $Page->TreeRight) {
+            array_pop($Right);
+            $CountRight--;
+         }  
+      }  
+      
+      // Are we opening a new list?
+      if ($CountRight > $LastRight) {
+         $OpenCount++;
+         //$ToPanel .= "\n<ol>";
+      } elseif ($OpenCount > $CountRight) {
+         // Or are we closing open list and list items?
+         while ($OpenCount > $CountRight) {
+            $OpenCount--;
+            //$ToPanel .= "</li>\n</ol>\n";
+         }
+         $ToPanel .= '</option>';
+      } elseif ($Loop > 0) {
+         // Or are we closing an open list item?
+         $ToPanel .= "</option>";
+      }
+
+      $Space = '';
+      $i = 1;
+      while ($i < $Page->Depth) {
+         $Space = $Space . '&nbsp;&nbsp;&nbsp;';
+         $i++;
+      }
+      $Test = '';
+      
+      if ($Page->Depth > 1) {
+         $Test = '&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      
+      $ToPanel .= "\n".'<option id="'.$Page->PageID.'">' . $Space . $Page->Name;
+      
+      // Add this node to the stack  
+      $Right[] = $Category->TreeRight;
+      $LastRight = $CountRight;
+      $Loop++;
+   }
 }
+if ($OpenCount > 0)
+   $ToPanel .= "</li>\n</ol>\n</li>\n";
+else
+   $ToPanel .= "</li>\n";
+
+
+//$ToPanel .= '</ol>';
 $ToPanel .= '</select>';
             //$this->Form->Dropdown('ParentPageID', , array('default' => '0', 'IncludeNull' => true)) . 
 $ToPanel .= '</li><li>';
-
-         
-         /*
-         <option value=""></option>
-                  <option value="0">None</option>
-                  <option value="1" selected="selected">test</option>
-                  <option value="2">Undersida</option>
-                  <option value="3">Undersida 2</option>
-                  <option value="4">Om oss</option>
-                  </select>*/
-         
 
 //$ToPanel .= $this->Form->Label('Associate Discussion', 'DiscussionID') . $this->Form->Dropdown('DiscussionID', $this->DiscussionsOptions, array('default' => '0'));
 

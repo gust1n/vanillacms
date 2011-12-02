@@ -24,17 +24,49 @@ class VanillaCMSController extends Gdn_Controller {
 		parent::Initialize();
 	}
 	
-   function parse_args( $args, $defaults = '' ) {
-   	if ( is_object( $args ) )
-   		$r = get_object_vars( $args );
-   	elseif ( is_array( $args ) )
-   		$r =& $args;
-   	else
-   		wp_parse_str( $args, $r );
+	/*
+	public function PageTree($Pages)
+	  {
+	    foreach ($Pages as $Page) {
+	       if ($Page['ParentPageID'] > 0) {
+	          echo 'The page' . $Page['Name'] . ' has a parent';
+	          
+	          $Parent = self::ArraySearch2($Pages,'PageID', $Page['ParentPageID']);
+	          
+	          $Parent[0]['Children'] = $Page;
+	          
+	          print_r($Parent);
+	       } 
+	    }
+	  }
+	  
+	  public function ArraySearch($array, $key, $value)
+	  {
+	      $results = array();
 
-   	if ( is_array( $defaults ) )
-   		return array_merge( $defaults, $r );
-   	return $r;
-   }
+	      if (is_array($array))
+	      {
+	         if ($array[$key] == $value)
+	            $results[] = $array;
+
+	            foreach ($array as $subarray)
+	               $results = array_merge($results, self::ArraySearch($subarray, $key, $value));
+	      }
+
+	      return $results;
+	   }
+	   
+	   public function ArraySearch2($array, $key, $value)
+	  {
+	       $arrIt = new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
+
+	    foreach ($arrIt as $sub) {
+	       $subArray = $arrIt->getSubIterator();
+	       if ($subArray[$key] === $value) {
+	           $outputArray[] = iterator_to_array($subArray);
+	       }
+	   }
+	   return $outputArray;
+	   }*/
 	
 }

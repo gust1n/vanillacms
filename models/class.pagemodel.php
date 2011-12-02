@@ -4,7 +4,7 @@ class PageModel extends Gdn_Model {
    
 	public function __construct() {
 		parent::__construct('Page');
-	}
+	}   
 	
 	public function Search($SearchModel) {
 		$SearchModel->AddSearch($this->PageSql($SearchModel));
@@ -58,7 +58,107 @@ class PageModel extends Gdn_Model {
 			   ->OrderBy('p.Sort')
 	         ->Get();
 	}
-   
+	
+	
+	/**
+    * Rebuilds the Pagetree. We are using the Nested Set tree model.
+    * Built by the vanillaforums.org team
+    * @ref http://articles.sitepoint.com/article/hierarchical-data-database/2
+    * @ref http://en.wikipedia.org/wiki/Nested_set_model
+    *  
+    * @since 2.0.0
+    * @access public
+    */
+   public function RebuildTree() {
+      // Grab all of the pages.
+      $Pages = $this->SQL->Get('Page', 'TreeLeft, Sort, Name');
+      $Pages = Gdn_DataSet::Index($Pages->ResultArray(), 'PageID');
+
+      // Make sure the tree has a root.
+      if (!isset($Pages[-1])) {
+         $RootCat = array('PageID' => -1, 'TreeLeft' => 1, 'TreeRight' => 4, 'Depth' => 0, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'DateUpdated' => Gdn_Format::ToDateTime(), 'Name' => 'Root', 'UrlCode' => '', 'Body' => 'Root of Pagetree. Users should never see this.', 'InMenu' => 0, 'Sort' => 0, 'ParentPageID' => NULL);
+         $Pages[-1] = $RootCat;
+         $this->SQL->Insert('Page', $RootCat);
+      }
+
+      // Build a tree structure out of the pages.
+      $Root = NULL;
+      foreach ($Pages as &$Page) {
+         if (!isset($Page['PageID']))
+            continue;
+         
+         // Backup Page settings for efficient database saving.
+         try {
+            $Page['_TreeLeft'] = $Page['TreeLeft'];
+            $Page['_TreeRight'] = $Page['TreeRight'];
+            $Page['_Depth'] = $Page['Depth'];
+            //$Page['_PermissionCategoryID'] = $Page['PermissionCategoryID'];
+            $Page['_ParentPageID'] = $Page['ParentPageID'];
+         } catch (Exception $Ex) {
+            $Foo = 'Bar';
+         }
+
+         if ($Page['PageID'] == -1) {
+            $Root =& $Page;
+            continue;
+         }
+
+         $ParentID = $Page['ParentPageID'];
+         if (!$ParentID) {
+            $ParentID = -1;
+            $Page['ParentPageID'] = $ParentID;
+         }
+         if (!isset($Pages[$ParentID]['Children']))
+            $Pages[$ParentID]['Children'] = array();
+         $Pages[$ParentID]['Children'][] =& $Page;
+      }
+      unset($Page);
+
+      // Set the tree attributes of the tree.
+      $this->_SetTree($Root);
+      unset($Root);
+
+      // Save the tree structure.
+      foreach ($Pages as $Page) {
+         if (!isset($Page['PageID']))
+            continue;
+         if ($Page['_TreeLeft'] != $Page['TreeLeft'] || $Page['_TreeRight'] != $Page['TreeRight'] || $Page['_Depth'] != $Page['Depth'] || $Page['_ParentPageID'] != $Page['ParentPageID'] || $Page['Sort'] != $Page['TreeLeft']) {
+            $this->SQL->Put('Page',
+               array('TreeLeft' => $Page['TreeLeft'], 'TreeRight' => $Page['TreeRight'], 'Depth' => $Page['Depth'], 'ParentPageID' => $Page['ParentPageID'], 'Sort' => $Page['TreeLeft']),
+               array('PageID' => $Page['PageID']));
+         }
+      }
+      //$this->SetCache();
+   }
+	
+	
+   /**
+    *
+    * Built by the vanillaforums.org team
+    * @access protected
+    * @param array $Node
+    * @param int $Left
+    * @param int $Depth
+    */
+   protected function _SetTree(&$Node, $Left = 1, $Depth = 0) {
+      $Right = $Left + 1;
+      
+      if (isset($Node['Children'])) {
+         foreach ($Node['Children'] as &$Child) {
+            $Right = $this->_SetTree($Child, $Right, $Depth + 1);
+            $Child['ParentPageID'] = $Node['PageID'];
+         }
+         unset($Node['Children']);
+      }
+
+      $Node['TreeLeft'] = $Left;
+      $Node['TreeRight'] = $Right;
+      $Node['Depth'] = $Depth;
+
+      return $Right + 1;
+   }
+	
+
    /**
     * Returns ALL parent pages or pages without children
     *
@@ -93,20 +193,7 @@ class PageModel extends Gdn_Model {
  	         ->Get();
 	    }
 	      
-	}
-	/**
-	 * Returns all pages that are ONLY parent pages
-	 *
-	 * @return object SQL results.
-	 * @author Jocke Gustin
-	 */
-	public function GetParentsOnly() {
-	      return $this->SQL
-	         ->Select('p.*')
-            ->Where('p.IsParentOnly', '1')
-	         ->From('Page p')
-	         ->Get();
-	}
+	}	
 	
 	/**
 	 * Returns the published children of a selected parent page

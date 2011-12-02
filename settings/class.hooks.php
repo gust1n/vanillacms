@@ -24,6 +24,9 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $Parents = $ParentsQuery->Result(DATASET_TYPE_ARRAY); 
 
       $i = 0;
+      /*
+         TODO Add new tree-view
+      */
       foreach ($Parents as $Parent) {
          if ($Parent['Status'] == 'published' && $Parent['InMenu'] == 1) {            
             $Sender->Menu->AddLink($Parent['UrlCode'], $Parent['Name'], $Parent['UrlCode'], FALSE);
