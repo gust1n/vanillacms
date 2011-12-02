@@ -201,7 +201,7 @@ $LastRight = 0;
 $OpenCount = 0;
 $Loop = 0;
 
-foreach ($this->ParentPagesOptions->Result() as $Page) {
+foreach ($this->AllPages->Result() as $Page) {
    if ($Page->PageID > 0) {
       // Only check stack if there is one
       $CountRight = count($Right);

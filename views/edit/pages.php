@@ -25,79 +25,73 @@ $Session = Gdn::Session();
    </ul>
 </div>
 <?php echo $this->Form->Errors(); ?>
-<table id="PageTable" class="FormTable AltRows">
-	<thead>
-		<tr id="0">
-			<th width="350px"><?php echo T('Page'); ?></th>
-			<th class="Alt"><?php echo T('Last Edited'); ?></th>
-			<th class="Alt"><?php echo T('Options'); ?></th>
-		</tr>
-	</thead>
-	<tbody>
-		<?php
-		$Alt = FALSE;
-		foreach ($this->Pages as $Parent) {
-			$LastUpdated = $Parent['DateUpdated'] > $Parent['DateInserted'] ? $Parent['DateUpdated'] : $Parent['DateInserted'];
-			$LastUserName = $Parent['UpdateUserName'] ? $Parent['UpdateUserName'] : $Parent['InsertUserName'];
-			$LastUserID = $Parent['UpdateUserID'] ? $Parent['UpdateUserID'] : $Parent['InsertUserID'];
-		   $Status = $Parent['Status'] == 'published' ? 'Enabled' : 'Disabled';
-		   $State = strtolower($Status);
-		   //echo $Parent['Status'];
-		   if ($this->Filter == 'all' || $this->Filter == $State) {
-		      $Alt = $Alt ? FALSE : TRUE;
-		      $ScreenName = $Parent['Name'];
-		      //$SettingsUrl = $State == 'enabled' ? ArrayValue('SettingsUrl', $PluginInfo, '') : '';
-		      $RowClass = $Status;
-		      if ($Alt) $RowClass .= ' Alt';
-		      ?>
-		      <tr class="More <?php echo $RowClass; ?>">
-		         <td><?php 
-		            echo Anchor($ScreenName, $Parent['UrlCode'], array('class' => 'ParentPage Page')); 
-		            echo Anchor(T('Edit'), '/edit/'.$Parent['PageID'], 'SmallButton EditButton'); ?>
-		         </td>
-		         <td><?php echo $LastUpdated . ' ' . T('by') . ' ' . Anchor($LastUserName, 'profile/'.$LastUserID.'/'.$LastUserName); ?></td>
-		         <td><?php
-			         if ($Status == 'Enabled')
-				          echo Anchor( T('Disable'), '/edit/status/'.$Parent['PageID'].'/draft/'.$Session->TransientKey(), 'SmallButton UnpublishMessage');
-			         else
-				          echo Anchor( T('Enable'), '/edit/status/'.$Parent['PageID'].'/published/'.$Session->TransientKey(), 'SmallButton PublishMessage');
-			         echo Anchor(T('Delete'), '/edit/status/'.$Parent['PageID'].'/deleted/'.$Session->TransientKey(), 'DeleteMessage SmallButton'); ?>
-		         </td>
-		      </tr>
-		      
-		
-		      <?php
-		      if (array_key_exists('Children', $Parent)) {
-		      
-      		   foreach ($Parent['Children'] as $Child) { 
-         		   $ChildLastUpdated = $Child->DateUpdated > $Child->DateInserted ? $Child->DateUpdated : $Child->DateInserted;
-         			$ChildLastUserName = $Child->UpdateUserName ? $Child->UpdateUserName : $Child->InsertUserName;
-         			$ChildLastUserID = $Child->UpdateUserID ? $Child->UpdateUserID : $Child->InsertUserID;
-         		   $ChildStatus = $Child->Status == 'published' ? 'Enabled' : 'Disabled';?>
-         		   <tr class="More <?php echo $ChildStatus; ?>">
-         		      <td>
-         		         <?php echo Anchor('- ' .$Child->Name, $Child->UrlCode, array('class' => 'Page')); 
-         		          echo Anchor(T('Edit'), '/edit/'.$Child->PageID, 'SmallButton EditButton');?>
-         		      </td>
-         		      <td>
-         		         <?php echo $ChildLastUpdated . ' ' . T('by') . ' ' . Anchor($ChildLastUserName, 'profile/'.$ChildLastUserID.'/'.$ChildLastUserName); ?>
-         		      </td>
-         		      <td><?php
-      			         if ($ChildStatus == 'Enabled')
-      				         echo Anchor( T('Disable'), '/edit/status/'.$Child->PageID.'/draft/'.$Session->TransientKey(), 'SmallButton UnpublishMessage');
-      			         else
-      				         echo Anchor( T('Enable'), '/edit/status/'.$Child->PageID.'/published/'.$Session->TransientKey(), 'SmallButton PublishMessage');
-      			         echo Anchor( T('Delete'), '/edit/status/'.$Child->PageID.'/deleted/'.$Session->TransientKey(), 'SmallButton DeleteMessage'); ?>
-      		         </td>
-         		<?php }
-         		
-		      }
-      		
-		    
-		} //END LOOP
-         
-	}
-		?>
 
-</table>
+		<?php		
+		echo Wrap(T('Organize Pages'), 'h1') . '<ol class="Sortable">';
+		
+      $Right = array(); // Start with an empty $Right stack
+      $LastRight = 0;
+      $OpenCount = 0;
+      $Loop = 0;
+      //die(print_r($this->AllPages->Result()));
+      foreach ($this->AllPages->Result() as $Page) {
+         if ($Page->PageID > 0) {
+            // Only check stack if there is one
+            $CountRight = count($Right);
+            if ($CountRight > 0) {  
+               // Check if we should remove a node from the stack
+               while (array_key_exists($CountRight - 1, $Right) && $Right[$CountRight - 1] < $Page->TreeRight) {
+                  array_pop($Right);
+                  $CountRight--;
+               }  
+            }  
+
+            // Are we opening a new list?
+            if ($CountRight > $LastRight) {               
+               $OpenCount++;
+               echo "\n<ol>";
+            } elseif ($OpenCount > $CountRight) {
+               // Or are we closing open list and list items?
+               while ($OpenCount > $CountRight) {
+                  $OpenCount--;
+                  echo "</li>\n</ol>\n";
+               }
+               echo '</li>';
+            } elseif ($Loop > 0) {
+               // Or are we closing an open list item?
+               echo "</li>";
+            }
+
+            echo "\n".'<li id="list_'.$Page->PageID.'">';
+            // DEBUG: echo Wrap($Page->Name.' [countright: '.$CountRight.' lastcount: '.$LastRight.' opencount: '.$OpenCount.']', 'div');
+            $PageUrl = Url('categories/'.rawurlencode($Page->UrlCode).'/', TRUE);
+            echo Wrap(
+               '<table'.($OpenCount > 0 ? ' class="Indented '.$Page->Status.'"' : '').'>
+                  <tr>
+                     <td>
+                        <strong>'.$Page->Name.'</strong>
+                        '.Anchor(htmlspecialchars(rawurldecode($PageUrl)), $PageUrl).'
+                        './*Wrap("ID: {$Page->PageID}, PermID: {$Page->PermissionPageID}", 'div').*/'
+                     </td>
+                     <td class="Buttons">'
+                        .Anchor(T('Edit'), 'vanilla/settings/editcategory/'.$Page->PageID, 'SmallButton')
+                        .Anchor(T('Delete'), 'vanilla/settings/deletecategory/'.$Page->PageID, 'SmallButton')
+                     .'</td>
+                  </tr>
+               </table>'
+            ,'div');
+
+            // Add this node to the stack  
+            $Right[] = $Page->TreeRight;
+            $LastRight = $CountRight;
+            $Loop++;
+         }
+      }
+      if ($OpenCount > 0)
+         echo "</li>\n</ol>\n</li>\n";
+      else
+         echo "</li>\n";
+
+      echo '</ol>';	
+?>
 

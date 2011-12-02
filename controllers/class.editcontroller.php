@@ -45,6 +45,8 @@ class EditController extends Gdn_Controller {
 
       $this->Filter = $Filter;
       
+      $this->AllPages = $this->PageModel->Get();
+      
       $this->AllParents = $this->PageModel->GetAllParents($Filter);
 
       $this->Pages = $this->AllParents->Result(DATASET_TYPE_ARRAY); 
@@ -53,29 +55,15 @@ class EditController extends Gdn_Controller {
       $UnpublishedCount = 0;
       
       $i = 0;
-      
-      /*
-         TODO Add new tree-view
-      */
-      
-      foreach ($this->Pages as $Parent) {
-         if ($Parent['Status'] == 'published') {
-            $PublishedCount++;
-         } else {
-            $UnpublishedCount++;
-         }
-         $Children = $this->PageModel->GetAllChildren($Parent['PageID']);
-         foreach ($Children->Result() as $Child) {
-            $this->Pages[$i]['Children'][$Child->PageID] = $Child;
             
-            if ($Child->Status == 'published') {
+      foreach ($this->AllPages->Result() as $Page) {
+         if ($Page->PageID > 0) {
+            if ($Page->Status == 'published') {
                $PublishedCount++;
             } else {
                $UnpublishedCount++;
             }
-         }
-         unset($Children); 
-         $i++;
+         } 
       }
       
       $this->PublishedCount = $PublishedCount;
@@ -212,8 +200,8 @@ class EditController extends Gdn_Controller {
          }
       }
             
-      //$this->PageModel->RebuildTree();
-      $this->ParentPagesOptions = $this->PageModel->Get();      
+      $this->PageModel->RebuildTree();
+      $this->AllPages = $this->PageModel->Get();      
       
       //Render array with available meta keys
       $this->AvailableMetaKeys = $this->_AvailableMetaKeys();
