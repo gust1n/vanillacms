@@ -19,28 +19,24 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $Sender->AddJsFile('vcms.global.js', 'vanillacms');
       
       $PageModel = new PageModel();
-      $ParentsQuery = $PageModel->GetAllParents();
-
-      $Parents = $ParentsQuery->Result(DATASET_TYPE_ARRAY); 
-
-      $i = 0;
       /*
-         TODO Add new tree-view
+         TODO Build in menusystem only supports one-level deep nesting
       */
-      foreach ($Parents as $Parent) {
-         if ($Parent['Status'] == 'published' && $Parent['InMenu'] == 1) {            
-            $Sender->Menu->AddLink($Parent['UrlCode'], $Parent['Name'], $Parent['UrlCode'], FALSE);
+      $LastDepth = 1;
+      $LastParentID = '';
+      $LastParentUrlCode = '';
+      foreach ($PageModel->Get()->Result() as $Page) {
+         if ($Page->PageID > 0) { //We dont want the "root" page
+            if ($Page->ParentPageID > 0) { //If has parents (top level has -1)
+               $Sender->Menu->AddLink($LastParentUrlCode, $Page->Name, $Page->UrlCode, FALSE);
+            } else {
+               $Sender->Menu->AddLink($Page->UrlCode, $Page->Name, $Page->UrlCode, FALSE);
+               $LastParentID = $Page->PageID;
+               $LastParentUrlCode = $Page->UrlCode;
+            }
+            $LastDepth = $Page->Depth;
+            
          }
-
-         $ChildrenQuery = $PageModel->GetPublishedChildren($Parent['PageID']);
-
-         foreach ($ChildrenQuery->Result() as $Child) {
-            if ($Child->InMenu == 1) {
-                  $Sender->Menu->AddLink($Parent['UrlCode'], '<span class="PageName">' . $Child->Name . '</span>', $Child->UrlCode, FALSE);
-            }  
-         }
-         unset($Children); 
-         $i++;
       }
       
       //Removes the default conversations and discussions menu items from vanilla and conversations applications
