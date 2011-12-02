@@ -188,6 +188,9 @@ foreach ($this->ParentPagesOptions as $ParentPage) {
       if ($this->Page->ParentPageID == $Child->ParentPageID) {
          $attr = 'selected = "selected"';
       }
+      /*
+         TODO Fix proper select for children
+      */
       
       $ToPanel .= '<option value="'.$Child->PageID.'" class="level-1" '.$attr.'>&nbsp;&nbsp;&nbsp;'.$Child->Name.'</option>';
    }  

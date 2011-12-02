@@ -241,23 +241,8 @@ class PageModel extends Gdn_Model {
       }
 	}
 	
-/*
-   public function Enable($PageID)
-   {
-      $this->SQL->Update('Page')
-            ->Set('Enabled', 1)
-            ->Where('PageID', $PageID)
-            ->Put();
-   }
-   public function Disable($PageID)
-   {
-      $this->SQL->Update('Page')
-            ->Set('Enabled', 0)
-            ->Where('PageID', $PageID)
-            ->Put();
-   }*/
    /**
-    * Publishes or unpuvlishes pages
+    * Publishes or unpublishes pages
     *
     * @param int $PageID Selected page
     * @param string $Status Status to be set, eg 'draft' or published

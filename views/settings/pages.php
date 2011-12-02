@@ -39,7 +39,7 @@ $Session = Gdn::Session();
 			$LastUpdated = $Parent['DateUpdated'] > $Parent['DateInserted'] ? $Parent['DateUpdated'] : $Parent['DateInserted'];
 			$LastUserName = $Parent['UpdateUserName'] ? $Parent['UpdateUserName'] : $Parent['InsertUserName'];
 			$LastUserID = $Parent['UpdateUserID'] ? $Parent['UpdateUserID'] : $Parent['InsertUserID'];
-		   $Css = $Parent['Enabled'] == 1 ? 'Enabled' : 'Disabled';
+		   $Css = $Parent['Status'] == 'published' ? 'Enabled' : 'Disabled';
 		   $State = strtolower($Css);
 		   if ($this->Filter == 'all' || $this->Filter == $State) {
 		      $Alt = $Alt ? FALSE : TRUE;
@@ -55,7 +55,7 @@ $Session = Gdn::Session();
 		         </td>
 		         <td><?php echo $LastUpdated . ' ' . T('by') . ' ' . Anchor($LastUserName, 'profile/'.$LastUserID.'/'.$LastUserName); ?></td>
 		         <td><?php
-			         if ($Parent['Enabled'] == 1)
+			         if ($Parent['Status'] == 'published')
 				         echo Anchor( T('Disable'), '/vanillacms/settings/disablepage/'.$Parent['PageID'].'/'.$Session->TransientKey(), 'SmallButton');
 			         else
 				         echo Anchor( T('Enable'), '/vanillacms/settings/enablepage/'.$Parent['PageID'].'/'.$Session->TransientKey(), 'SmallButton');
@@ -69,7 +69,7 @@ $Session = Gdn::Session();
       		   $ChildLastUpdated = $Child->DateUpdated > $Child->DateInserted ? $Child->DateUpdated : $Child->DateInserted;
       			$ChildLastUserName = $Child->UpdateUserName ? $Child->UpdateUserName : $Child->InsertUserName;
       			$ChildLastUserID = $Child->UpdateUserID ? $Child->UpdateUserID : $Child->InsertUserID;
-      		   $ChildCss = $Child->Enabled == 1 ? 'Enabled' : 'Disabled';?>
+      		   $ChildCss = $Child->Status == 'published' ? 'Enabled' : 'Disabled';?>
       		   <tr class="More <?php echo $ChildCss; ?>">
       		      <td>
       		         <?php echo Anchor('- ' .$Child->Name, $Child->UrlCode, array('class' => 'Page')); 
@@ -79,7 +79,7 @@ $Session = Gdn::Session();
       		         <?php echo $ChildLastUpdated . ' ' . T('by') . ' ' . Anchor($ChildLastUserName, 'profile/'.$ChildLastUserID.'/'.$ChildLastUserName); ?>
       		      </td>
       		      <td><?php
-   			         if ($Child->Enabled == 1)
+   			         if ($Child->Status == 'published')
    				         echo Anchor( T('Disable'), '/vanillacms/settings/disablepage/'.$Child->PageID.'/'.$Session->TransientKey(), 'SmallButton');
    			         else
    				         echo Anchor( T('Enable'), '/vanillacms/settings/enablepage/'.$Child->PageID.'/'.$Session->TransientKey(), 'SmallButton');

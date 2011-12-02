@@ -262,6 +262,42 @@ class EditController extends Gdn_Controller {
       $this->Render();
    }
    
+   function dropdown_pages($args = '') {
+   	$defaults = array(
+   		'depth' => 0, 'ParentPageID' => 0,
+   		'selected' => 0, 'echo' => 1,
+   		'name' => 'page_id', 'id' => '',
+   		'show_option_none' => '', 'show_option_no_change' => '',
+   		'option_none_value' => ''
+   	);
+
+   	$r = VanillaCMSController::parse_args( $args, $defaults );
+   	/*ÄR HÄR*/
+   	$pages = get_pages($r);
+   	$output = '';
+   	$name = esc_attr($name);
+   	// Back-compat with old system where both id and name were based on $name argument
+   	if ( empty($id) )
+   		$id = $name;
+
+   	if ( ! empty($pages) ) {
+   		$output = "<select name=\"$name\" id=\"$id\">\n";
+   		if ( $show_option_no_change )
+   			$output .= "\t<option value=\"-1\">$show_option_no_change</option>";
+   		if ( $show_option_none )
+   			$output .= "\t<option value=\"" . esc_attr($option_none_value) . "\">$show_option_none</option>\n";
+   		$output .= walk_page_dropdown_tree($pages, $depth, $r);
+   		$output .= "</select>\n";
+   	}
+
+   	$output = apply_filters('wp_dropdown_pages', $output);
+
+   	if ( $echo )
+   		echo $output;
+
+   	return $output;
+   }
+   
    private function _ValidateUniqueUrlCode($UrlCode) {
       $Valid = FALSE;
 

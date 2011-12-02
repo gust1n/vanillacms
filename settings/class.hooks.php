@@ -25,29 +25,15 @@ class VanillaCMSHooks implements Gdn_IPlugin {
 
       $i = 0;
       foreach ($Parents as $Parent) {
-         if ($Parent['Enabled'] == 1 && $Parent['InMenu'] == 1) {
-            /*
-            if ($Parent['Name'] == 'Samtala') {
-                           $Sender->Menu->AddLink($Parent['UrlCode'], $Parent['Name'], 'discussions', FALSE);
-                           $Sender->Menu->AddLink($Parent['UrlCode'],'<span class="PageName">' . T('Discussions') . '</span><br /><span  class="PageDescription">Samtala kring dina frågor</span>', '/discussions');
-                        }
-                        else*/
-            
-               $Sender->Menu->AddLink($Parent['UrlCode'], $Parent['Name'], $Parent['UrlCode'], FALSE);
+         if ($Parent['Status'] == 'published' && $Parent['InMenu'] == 1) {            
+            $Sender->Menu->AddLink($Parent['UrlCode'], $Parent['Name'], $Parent['UrlCode'], FALSE);
          }
 
          $ChildrenQuery = $PageModel->GetPublishedChildren($Parent['PageID']);
 
          foreach ($ChildrenQuery->Result() as $Child) {
             if ($Child->InMenu == 1) {
-               //$Quote = '';
-               //$Quote = $PageModel->GetPageMeta($Child->PageID, 'QuoteModule');
-               //if (isset($Quote)) {
-               //   $Sender->Menu->AddLink($Parent['UrlCode'], '<span class="PageName">' . $Child->Name . '</span><br /><span class="PageDescription">' . $Quote->MetaValue . '</span>', $Child->UrlCode, FALSE);
-               //} else {
                   $Sender->Menu->AddLink($Parent['UrlCode'], '<span class="PageName">' . $Child->Name . '</span>', $Child->UrlCode, FALSE);
-               //}
-               //unset($Quote);
             }  
          }
          unset($Children); 
@@ -131,19 +117,6 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $ControllerData['Vanilla/Discussion/Index'] = T('Comments Page');
       $ControllerData['Dashboard/Entry/Signin'] = T('Sign In Page');
       $ControllerData['Dashboard/Entry/Register'] = T('Register Page');
-
-      //Add new entry for each of my custom pages
-      /*
-      $PageModel = new PageModel();
-            $EnabledPages = $PageModel->GetEnabled();
-            foreach ($EnabledPages as $Page) {
-               if($Page->IsParentOnly != 1) {
-                  $ExUrlCode = explode('/', $Page->UrlCode);
-                  $UrlCode = implode('.', $ExUrlCode);
-                  $ControllerData['Jpcore/Page/'.$UrlCode] = T('Sida').': ' . $Page->Name;
-               }
-            }*/
-      
 
    }
 
