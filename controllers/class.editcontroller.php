@@ -47,10 +47,6 @@ class EditController extends Gdn_Controller {
       
       $this->AllPages = $this->PageModel->Get();
       
-      $this->AllParents = $this->PageModel->GetAllParents($Filter);
-
-      $this->Pages = $this->AllParents->Result(DATASET_TYPE_ARRAY); 
-      
       $PublishedCount = 0;
       $UnpublishedCount = 0;
       
@@ -201,7 +197,7 @@ class EditController extends Gdn_Controller {
       }
             
       $this->PageModel->RebuildTree();
-      $this->AllPages = $this->PageModel->Get();      
+      $this->AvailableParents = $this->PageModel->Get(array('Exclude' => $this->Page->PageID));      
       
       //Render array with available meta keys
       $this->AvailableMetaKeys = $this->_AvailableMetaKeys();

@@ -25,48 +25,28 @@ class VanillaCMSController extends Gdn_Controller {
 	}
 	
 	/*
-	public function PageTree($Pages)
-	  {
-	    foreach ($Pages as $Page) {
-	       if ($Page['ParentPageID'] > 0) {
-	          echo 'The page' . $Page['Name'] . ' has a parent';
-	          
-	          $Parent = self::ArraySearch2($Pages,'PageID', $Page['ParentPageID']);
-	          
-	          $Parent[0]['Children'] = $Page;
-	          
-	          print_r($Parent);
-	       } 
-	    }
-	  }
-	  
-	  public function ArraySearch($array, $key, $value)
-	  {
-	      $results = array();
+	public function ParseArgs($Args = array(), $DefaultArgs = array() ) {
 
-	      if (is_array($array))
-	      {
-	         if ($array[$key] == $value)
-	            $results[] = $array;
+	       $Result = array_merge( $DefaultArgs, $Args );
 
-	            foreach ($array as $subarray)
-	               $results = array_merge($results, self::ArraySearch($subarray, $key, $value));
-	      }
-
-	      return $results;
-	   }
-	   
-	   public function ArraySearch2($array, $key, $value)
-	  {
-	       $arrIt = new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
-
-	    foreach ($arrIt as $sub) {
-	       $subArray = $arrIt->getSubIterator();
-	       if ($subArray[$key] === $value) {
-	           $outputArray[] = iterator_to_array($subArray);
-	       }
-	   }
-	   return $outputArray;
+	       return $Result;
 	   }*/
 	
+   
+   function ParseArgs($Args, $Defaults = '') {
+      
+   	
+   	if (is_object($Args)) {
+   	        $r = get_object_vars($Args);
+   	     } elseif (is_array($Args)) {
+   	        $r =& $Args;
+   	     }
+   	        
+   	     if (is_array($Defaults)) {
+   	        return array_merge($Defaults, $r);
+   	     }
+   	           
+   	     return $r;
+   	
+   }
 }

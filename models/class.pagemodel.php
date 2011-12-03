@@ -47,16 +47,39 @@ class PageModel extends Gdn_Model {
     * @return object SQL results.
     * @author Jocke Gustin
     */
-	public function Get() {
-	      return $this->SQL
+	public function Get($Args = array()) {
+	   
+	   $Defaults = array(
+   		'OrderBy' => 'Sort', 'ParentPageID' => '',
+   		'PageID' => '', 'Exclude' => '',
+   	);
+   	
+   	$r = VanillaCMSController::ParseArgs($Args, $Defaults);	   	
+   	extract( $r, EXTR_SKIP );
+	   
+	      $this->SQL
 	         ->Select('p.*')
 			   ->Select('uu.Name as UpdateUserName')
 			   ->Select('ui.Name as InsertUserName')
 			   ->LeftJoin('User uu', 'p.UpdateUserID = uu.UserID')
 			   ->LeftJoin('User ui', 'p.InsertUserID = ui.UserID')
 	         ->From('Page p')
-			   ->OrderBy('p.Sort')
-	         ->Get();
+			   ->OrderBy('p.' . $OrderBy);
+	      
+	      if ($PageID) {
+	        $this->SQL->Where('p.PageID', $PageID);
+	      }
+	      if ($ParentPageID) {
+	        $this->SQL->Where('p.ParentPageID', $ParentPageID);
+	      }
+	      $Exclude = explode(",", $Exclude);
+	      foreach ($Exclude as $ExcludeID) {
+	        $this->SQL->Where('p.PageID <>', $ExcludeID);
+	      }
+	         
+	      $Data = $this->SQL->Get();
+	      
+	      return $Data;
 	}
 	
 	

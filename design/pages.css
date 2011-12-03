@@ -1,11 +1,3 @@
-a.ParentPage,
-a:link.ParentPage {
-  font-weight:bold;
-}
-table a.EditButton {
-   display:none;
-   margin-left:10px;
-}
-table#PageTable tr:hover td{
-   background:#ffe;
-}
+table.draft {border-color:#ccc;background:#eee}
+table.draft td{background:#eee}
+ol.Sortable td.AuthorDate{position: absolute;right: 200px;text-align: right;}

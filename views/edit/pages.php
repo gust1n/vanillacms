@@ -65,17 +65,26 @@ $Session = Gdn::Session();
             echo "\n".'<li id="list_'.$Page->PageID.'">';
             // DEBUG: echo Wrap($Page->Name.' [countright: '.$CountRight.' lastcount: '.$LastRight.' opencount: '.$OpenCount.']', 'div');
             $PageUrl = Url('categories/'.rawurlencode($Page->UrlCode).'/', TRUE);
+            $PageDate = $Page->DateUpdated > $Page->DateInserted ? $Page->DateUpdated : $Page->DateInserted;
+            $Status = '';
+            if ($Page->Status != 'published') {
+               $Status = '(' . $Page->Status . ')';
+            }
             echo Wrap(
                '<table'.($OpenCount > 0 ? ' class="Indented '.$Page->Status.'"' : '').'>
                   <tr>
                      <td>
-                        <strong>'.$Page->Name.'</strong>
+                        <strong>'.$Page->Name.'&nbsp;&nbsp;&nbsp;' . $Status . '</strong>
                         '.Anchor(htmlspecialchars(rawurldecode($PageUrl)), $PageUrl).'
                         './*Wrap("ID: {$Page->PageID}, PermID: {$Page->PermissionPageID}", 'div').*/'
                      </td>
+                        <td class="AuthorDate">
+                           <strong>'. T('By:') . ' ' . $Page->InsertUserName.'</strong>
+                           '.Gdn_Format::Date($PageDate).'
+                        </td>
                      <td class="Buttons">'
-                        .Anchor(T('Edit'), 'vanilla/settings/editcategory/'.$Page->PageID, 'SmallButton')
-                        .Anchor(T('Delete'), 'vanilla/settings/deletecategory/'.$Page->PageID, 'SmallButton')
+                        .Anchor(T('Edit'), '/edit/'.$Page->PageID, 'SmallButton EditButton')
+                        .Anchor( T('Delete'), '/edit/status/'.$Page->PageID.'/deleted/'.$Session->TransientKey(), 'SmallButton DeleteMessage')
                      .'</td>
                   </tr>
                </table>'

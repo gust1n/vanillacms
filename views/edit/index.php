@@ -201,7 +201,7 @@ $LastRight = 0;
 $OpenCount = 0;
 $Loop = 0;
 
-foreach ($this->AllPages->Result() as $Page) {
+foreach ($this->AvailableParents->Result() as $Page) {
    if ($Page->PageID > 0) {
       // Only check stack if there is one
       $CountRight = count($Right);
@@ -234,11 +234,6 @@ foreach ($this->AllPages->Result() as $Page) {
       while ($i < $Page->Depth) {
          $Space = $Space . '&nbsp;&nbsp;&nbsp;';
          $i++;
-      }
-      $Test = '';
-      
-      if ($Page->Depth > 1) {
-         $Test = '&nbsp;&nbsp;&nbsp;&nbsp;';
       }
       
       $ToPanel .= "\n".'<option id="'.$Page->PageID.'">' . $Space . $Page->Name;
