@@ -91,9 +91,8 @@ jQuery(document).ready(function($) {
          $(button).attr('disabled', 'disabled');
          var frm = $(button).parents('form').get(0);
          var textbox = $(frm).find('textarea');
-         // Post the form, and append the results to #Discussion, and erase the textbox
          var postValues = $(frm).serialize();
-         postValues += '&DeliveryType=BOOL&DeliveryMethod=JSON'; // DELIVERY_TYPE_VIEW
+         postValues += '&DeliveryType=VIEW&DeliveryMethod=JSON'; // DELIVERY_TYPE_VIEW
          postValues += '&Page%2FStatus='+button.name;
          //alert(postValues);
          
@@ -122,7 +121,7 @@ jQuery(document).ready(function($) {
                json = $.postParseJson(json);
                
                //$('#Content').html(json.Data);
-               $('span.Publish.Time').html(json.InformMessages['0']['Message'].substr(-5, 5));
+               $('span.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
                
                // Remove any old errors from the form
                $(frm).find('div.Errors').remove();
@@ -154,27 +153,6 @@ jQuery(document).ready(function($) {
          $(sender).parents('tr').remove();
       }
    });
-   
-   $('a.PublishMessage').popup({
-      confirm: true,
-      followConfirm: false,
-      afterConfirm: function(json, sender) {
-         $(sender).parents('tr').addClass('Enabled');
-         $(sender).parents('tr').removeClass('Disabled');
-      }
-   });
-   $('a.UnpublishMessage').popup({
-      confirm: true,
-      followConfirm: false,
-      afterConfirm: function(json, sender) {
-         $(sender).parents('tr').removeClass('Enabled');
-         $(sender).parents('tr').addClass('Disabled');
-      }
-   });
-
-
-
-
 
    if ($.fn.alphanumeric) {
       $('#Form_UrlCode').alphanumeric({allow:"-"});
@@ -223,11 +201,11 @@ jQuery(document).ready(function($) {
    }
        
    $( 'textarea.Editor' ).ckeditor({
-      customConfig : gdn.definition('WebRoot') + 'applications/vanillacms/js/ckeditor/config.js',   
-       filebrowserUploadUrl  :gdn.definition('WebRoot') + 'applications/vanillacms/js/ckeditor/kcfinder/upload.php?type=files',
-       filebrowserImageUploadUrl : gdn.definition('WebRoot') + 'applications/vanillacms/js/ckeditor/kcfinder/upload.php?type=images',
-      filebrowserBrowseUrl :gdn.definition('WebRoot') + 'applications/vanillacms/js/ckeditor/kcfinder/browse.php?type=files',
-       filebrowserImageBrowseUrl : gdn.definition('WebRoot') + 'applications/vanillacms/js/ckeditor/kcfinder/browse.php?type=images',
+      customConfig : gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/config.js',   
+       filebrowserUploadUrl  :gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/kcfinder/upload.php?type=files',
+       filebrowserImageUploadUrl : gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/kcfinder/upload.php?type=images',
+      filebrowserBrowseUrl :gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/kcfinder/browse.php?type=files',
+       filebrowserImageBrowseUrl : gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/kcfinder/browse.php?type=images',
    });
    
    $('#Form_ParentPageID').change(function() {

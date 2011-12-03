@@ -6,13 +6,13 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 CKEDITOR.editorConfig = function( config )
 {
 	// Define changes to default configuration here. For example:
-	config.language = 'sv';
+	//config.language = 'sv';
 	config.uiColor = '#ddd';
 	//config.contentsCss = gdn.definition('WebRoot') + '/themes/default/design/style.css';
-	config.toolbar = 'JPeditor';
+	config.toolbar = 'VCMSeditor';
 	
 
-   config.toolbar_JPeditor =
+   config.toolbar_VCMSeditor =
    [
        ['Source'],
        ['Cut','Copy','Paste','tokens'],

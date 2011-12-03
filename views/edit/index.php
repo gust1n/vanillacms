@@ -160,7 +160,7 @@ if (!is_object($this->Page)) {
 	//$Button = $this->Form->Button('Update page', array('class' => 'Button SaveButton', 'type' => 'submit'));
 } 
 else {
-   $Status = T('Published') . Anchor( T('Disable'), '/edit/status/'.$this->Page->PageID.'/draft/'.$Session->TransientKey(), 'UnpublishMessage');
+   $Status = T('Published');
 	$Time = Gdn_Format::Date($this->Page->DateUpdated);
 	$ButtonText = T('Update');	
 }
@@ -174,27 +174,8 @@ $ToPanel .= '</div>';
 $ToPanel .= '<div class="Box" id="PageAttributes"><h2>' . T('Page Options (optional)') . '</h2>';
 $ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<div class="ParentNotOptional"><ul><li>';
 $ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Discussion'), array('value' => '1')) . '</li><li>';
-$ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="0">';
+$ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="-1">';
 $ToPanel .= '<option value="-1">'.T('None').'</option>';            
-/*
-foreach ($this->ParentPagesOptions as $ParentPage) {   
-   $attr = '';
-   if ($this->Page->PageID == $ParentPage['ParentPageID']) {
-      $attr = 'selected = "selected"';
-   }
-   $ToPanel .= '<option value="'.$ParentPage['PageID'].'" '.$attr.'>'.$ParentPage['Name'].'</option>';  
-
-   foreach ($ParentPage['Children'] as $Child) {
-      $attr = '';
-      if ($this->Page->ParentPageID == $Child->ParentPageID) {
-         $attr = 'selected = "selected"';
-      }
-      
-      $ToPanel .= '<option value="'.$Child->PageID.'" class="level-1" '.$attr.'>&nbsp;&nbsp;&nbsp;'.$Child->Name.'</option>';
-   }  
-}*/
-
-//$ToPanel .= '<ol class="Sortable">';
 
 $Right = array(); // Start with an empty $Right stack
 $LastRight = 0;
@@ -235,8 +216,12 @@ foreach ($this->AvailableParents->Result() as $Page) {
          $Space = $Space . '&nbsp;&nbsp;&nbsp;';
          $i++;
       }
+      $attr = '';
+      if ($Page->PageID == $this->Page->ParentPageID) {
+         $attr = 'selected = "selected"';
+      }
       
-      $ToPanel .= "\n".'<option id="'.$Page->PageID.'">' . $Space . $Page->Name;
+      $ToPanel .= "\n".'<option value="'.$Page->PageID.'" '.$attr.'>' . $Space . $Page->Name;
       
       // Add this node to the stack  
       $Right[] = $Category->TreeRight;

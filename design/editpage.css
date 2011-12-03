@@ -160,11 +160,6 @@ a.DeleteMeta:hover {
 input.SaveButton {
    float:right;
 }
-a.UnpublishMessage {
-   font-weight:normal;
-   margin-left:5px;
-   text-decoration:underline;
-}
 #Panel ul.PanelInfo li {
    margin-bottom: 0;
 }
