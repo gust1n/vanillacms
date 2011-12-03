@@ -61,16 +61,6 @@ $Construct->Table('Discussion')
    ->Column('News', 'tinyint(1)', '0')
    ->Set();
 	
-/*
-$Construct->Table('Media')
-	->PrimaryKey('MediaID')
-	->Column('Name', 'varchar(255)')
-	->Column('Type', 'varchar(50)')
-	->Column('Description', 'varchar(255)')
-	->Column('InsertUserID', 'int', NULL, 'key')
-	->Column('DateInserted', 'datetime', NULL)
-	->Set($Explicit, $Drop);*/
-
 // Insert some activity types
 ///  %1 = ActivityName
 ///  %2 = ActivityName Possessive
