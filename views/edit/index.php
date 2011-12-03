@@ -40,10 +40,11 @@ echo $this->Form->TextBox('Name',
 
 //UrlCode
 echo '<div id="UrlCode">';
-echo Wrap(T('Page Url:'), 'strong');
-echo ' ';
+echo Wrap(T('Page Url:'), 'strong') . '  ';
 echo Gdn::Request()->Url('&nbsp;', TRUE);
-
+/*
+   TODO Fix handling of auto change urlcode when changing parent
+*/
 echo Wrap($this->Form->GetValue('UrlCode'));
 echo $this->Form->TextBox('UrlCode');
 echo Anchor(T('edit'), '#', 'EditUrlCode UrlToggle');
