@@ -1,14 +1,6 @@
 // This file contains javascript that is specific to the VanillaCMS/settings controller.
 jQuery(document).ready(function($) {
 
-   //Pages show edit link
-   $('tr.More').hover(function() {
-      $(this).children('td').children('.EditButton').show();
-   }, function() {
-      $(this).children('td').children('.EditButton').hide();
-   });
-
-
    //PageMeta
    $('#MetaKeySelect').change(function() {  //Show/Hide Assets
       var id = $('#MetaKeySelect option:selected').val();
@@ -20,21 +12,12 @@ jQuery(document).ready(function($) {
       };
       
       $('#MetaValueLabel').html($('#' + id + '_HelpText').val());
-/*
-      if ($('#MetaKeySelect option:selected').hasClass('ShowAsset')) {
-         
-      } else {
-         
-      }*/
-
 
    });
    
    $('textarea#MetaValue').livequery(function() {
       $(this).autogrow();
    });
-
-   
 
    $('a#NewMetaSubmit').live('click', function() {//Submit new PageMeta
       $('#MetaAjaxResponse').empty();
@@ -55,8 +38,7 @@ jQuery(document).ready(function($) {
          $('<tr><td>'+keyname+'<a href="deletemeta" class="DeleteMeta">[Ta bort]</a><input type="hidden" id="Form_MetaKey[ ]" name="Page/MetaKey[ ]" value="'+key+'|'+keyname+'|'+value+'|'+asset+'|'+assetname+'" /></td><td>'+assetname+'</td><td>'+value+'</td></tr>').appendTo('#TheList');
          $('#MetaList').show();
          $('#MetaList').effect("highlight", {}, 1000);
-      }
-      
+      }  
    });
 
    $('a.EditMeta').live('click', function() {
@@ -94,18 +76,6 @@ jQuery(document).ready(function($) {
          var postValues = $(frm).serialize();
          postValues += '&DeliveryType=VIEW&DeliveryMethod=JSON'; // DELIVERY_TYPE_VIEW
          postValues += '&Page%2FStatus='+button.name;
-         //alert(postValues);
-         
-         //alert('&Page%2FStatus='+button.name);
-         //return false;
-
-/*
-         var prefix = textbox.attr('name').replace('Message', '');
-         // Get the last message id on the page
-         var messages = $('ul.Conversation li');
-         var lastMessage = $(messages).get(messages.length - 1);
-         var lastMessageID = $(lastMessage).attr('id');
-         postValues += '&' + prefix + 'LastMessageID=' + lastMessageID;*/
 
          $(button).before('<span class="TinyProgress">&nbsp;</span>');
          $.ajax({
@@ -207,7 +177,9 @@ jQuery(document).ready(function($) {
       filebrowserBrowseUrl :gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/kcfinder/browse.php?type=files',
        filebrowserImageBrowseUrl : gdn.definition('WebRoot') + '/applications/vanillacms/js/ckeditor/kcfinder/browse.php?type=images',
    });
-   
+   /*
+      TODO Fix this for idiot-proof, really buggy for now
+   */
    $('#Form_ParentPageID').change(function() {
       var PageUrl = '';
       if ($('#Form_ParentPageID option:selected').val() > 0) {

@@ -72,6 +72,10 @@ $Construct->Table('Discussion')
 ///  %8 = RouteCode & Route
 
 // X added a discussion
+
+/*
+   TODO Fix Activitys on page edits
+*/
 if ($SQL->GetWhere('ActivityType', array('Name' => 'NewPage'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '1', 'Name' => 'NewPage', 'FullHeadline' => T('%1$s added a %8$s.'), 'ProfileHeadline' => T('%1$s added a %8$s.'), 'RouteCode' => 'page', 'Public' => '1'));
 
