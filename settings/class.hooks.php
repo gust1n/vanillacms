@@ -26,7 +26,7 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $LastParentID = '';
       $LastParentUrlCode = '';
       foreach ($PageModel->Get()->Result() as $Page) {
-         if ($Page->PageID > 0) { //We dont want the "root" page
+         if ($Page->PageID > 0 && $Page->InMenu == 1) { //We dont want the "root" page
             if ($Page->ParentPageID > 0) { //If has parents (top level has -1)
                $Sender->Menu->AddLink($LastParentUrlCode, $Page->Name, $Page->UrlCode, FALSE);
             } else {
