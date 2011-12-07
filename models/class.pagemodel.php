@@ -51,7 +51,7 @@ class PageModel extends Gdn_Model {
 	   
 	   $Defaults = array(
    		'OrderBy' => 'Sort', 'ParentPageID' => '',
-   		'PageID' => '', 'Exclude' => '',
+   		'PageID' => '', 'Exclude' => '', 'IncludeDeleted' => false
    	);
    	
    	$r = VanillaCMSController::ParseArgs($Args, $Defaults);	   	
@@ -66,6 +66,9 @@ class PageModel extends Gdn_Model {
 	         ->From('Page p')
 			   ->OrderBy('p.' . $OrderBy);
 	      
+	      if (!$IncludeDeleted) {
+	        $this->SQL->Where('p.Status <>', 'deleted');
+	      }
 	      if ($PageID) {
 	        $this->SQL->Where('p.PageID', $PageID);
 	      }

@@ -49,9 +49,7 @@ class EditController extends Gdn_Controller {
       
       $PublishedCount = 0;
       $UnpublishedCount = 0;
-      
-      $i = 0;
-            
+                  
       foreach ($this->AllPages->Result() as $Page) {
          if ($Page->PageID > 0) {
             if ($Page->Status == 'published') {
@@ -196,7 +194,7 @@ class EditController extends Gdn_Controller {
          }
       }
             
-      $this->PageModel->RebuildTree();
+      //$this->PageModel->RebuildTree();
       $this->AvailableParents = $this->PageModel->Get(array('Exclude' => $this->Page->PageID));      
       
       //Render array with available meta keys
