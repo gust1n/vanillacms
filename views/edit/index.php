@@ -39,17 +39,22 @@ echo $this->Form->TextBox('Name',
 /*<input id="s" name="s" type="text" value="' . $value . '" onfocus="if (this.value == \'' . $value . '\') {this.value = \'\';}" onblur="if (this.value == \'\') {this.value = \'' . $value . '\';}" size="'. $search_form_length .'" tabindex="1" />*/
 
 //UrlCode
-echo '<div id="UrlCode">';
+echo '<div id="UrlCodeContainer">';
 echo Wrap(T('Page Url:'), 'strong') . '  ';
 echo Gdn::Request()->Url('&nbsp;', TRUE);
 /*
    TODO Fix handling of auto change urlcode when changing parent
 */
-echo Wrap($this->Form->GetValue('UrlCode'));
-echo $this->Form->TextBox('UrlCode');
+$UrlCodeExploded = explode('/', $this->Form->GetValue('UrlCode'));
+$ThisUrlCode = $UrlCodeExploded[count($UrlCodeExploded) - 1];
+$ParentUrlCode = substr($this->Form->GetValue('UrlCode'), 0, -strlen($ThisUrlCode));
+
+echo Wrap($ParentUrlCode, 'span', array('id' => 'ParentUrlCode'));
+echo Wrap($ThisUrlCode, 'span', array('id' => 'UrlCode'));
+echo $this->Form->TextBox('UrlCode', array('value' => $ThisUrlCode));
 echo Anchor(T('edit'), '#', 'EditUrlCode UrlToggle');
 echo Anchor(T('OK'), '#', 'SaveUrlCode SmallButton UrlToggle');
-echo Anchor(T('visit'), Gdn::Request()->Url($this->Page->UrlCode, TRUE), 'VisitLink', array('target' => '_blank'));
+echo Anchor(T('visit'), Gdn::Request()->Url($this->Page->UrlCode, TRUE), 'VisitLink', array('target' => '_blank', 'id' => 'VisitLink'));
 echo '</div></div><div class="ParentNotOptional">';		
 
 
@@ -102,7 +107,7 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
                <label style="width:150px" for="MetaKeySelect">
                   <?php echo T('Name');?>
                </label>
-               <label style="width:70px" class="AssetShowHide" for="MetaAsset">
+               <label style="width:70px" class="AssetShowHide" for="MetaAssetSelect">
                   <?php echo T('Asset');?>
                </label>
             </th>
@@ -168,15 +173,15 @@ else {
 $ToPanel .= T('Status').': <span class="Publish Status">' . $Status . '</span><div class="clear"></div>';
 $ToPanel .= T('Last Saved').': <span class="Publish Time">' . $Time . '</span><div class="clear"></div>';
 //$ToPanel .= $this->Form->Button('Save Draft', array('class' => 'Button Draft', 'type' => 'submit'));
-$ToPanel .= '<input type="submit" id="Form_SaveDraft" name="draft" value="'.T('Save as Draft').'" class="Button Draft">';
-$ToPanel .= '<input type="submit" id="Form_SaveDraft" name="published" value="'.$ButtonText.'" class="Button SaveButton">';
+$ToPanel .= '<input type="submit" id="Form_SaveDraft" name="draft" value="'.T('Save as Draft').'" class="Button Draft" />';
+$ToPanel .= '<input type="submit" id="Form_SaveDraft" name="published" value="'.$ButtonText.'" class="Button SaveButton" />';
 //$ToPanel .= $this->Form->Button($ButtonText, array('class' => 'Button SaveButton', 'type' => 'submit'));
 $ToPanel .= '</div>';
 $ToPanel .= '<div class="Box" id="PageAttributes"><h2>' . T('Page Options (optional)') . '</h2>';
 $ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<div class="ParentNotOptional"><ul><li>';
 $ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Discussion'), array('value' => '1')) . '</li><li>';
 $ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="-1">';
-$ToPanel .= '<option value="-1">'.T('None').'</option>';            
+$ToPanel .= '<option value="-1" data-url="">'.T('None').'</option>';            
 
 $Right = array(); // Start with an empty $Right stack
 $LastRight = 0;
@@ -222,7 +227,7 @@ foreach ($this->AvailableParents->Result() as $Page) {
          $attr = 'selected = "selected"';
       }
       
-      $ToPanel .= "\n".'<option value="'.$Page->PageID.'" '.$attr.'>' . $Space . $Page->Name;
+      $ToPanel .= "\n".'<option value="'.$Page->PageID.'" data-url="'.$Page->UrlCode.'" '.$attr.'>' . $Space . $Page->Name;
       
       // Add this node to the stack  
       $Right[] = $Category->TreeRight;
@@ -233,13 +238,13 @@ foreach ($this->AvailableParents->Result() as $Page) {
 if ($OpenCount > 0)
    $ToPanel .= "</li>\n</ol>\n</li>\n";
 else
-   $ToPanel .= "</li>\n";
+   $ToPanel .= "</option>\n";
 
 
 //$ToPanel .= '</ol>';
 $ToPanel .= '</select>';
             //$this->Form->Dropdown('ParentPageID', , array('default' => '0', 'IncludeNull' => true)) . 
-$ToPanel .= '</li><li>';
+$ToPanel .= '<li>';
 
 //$ToPanel .= $this->Form->Label('Associate Discussion', 'DiscussionID') . $this->Form->Dropdown('DiscussionID', $this->DiscussionsOptions, array('default' => '0'));
 
@@ -253,7 +258,7 @@ $ToPanel .= '</li></ul></div></div>';
 
 /*
 if(count($this->PermissionData) > 0) {
-   $ToPanel .= '<div class="Box"><h2>'.T('Roles & Permissions').'</h2>';
+   $ToPanel .= '<div class="Box"><h2>'.T('Roles &amp; Permissions').'</h2>';
    //$ToPanel .= $this->Form->CheckBoxGridGroups($this->PermissionData, 'Permission');
    $ToPanel .= '<table id="Permissions"><thead><tr><th style="width:80px">Roll</th><th>Redigera</th><th>Besök</th></tr></thead><tbody>';
    foreach ($this->PermissionData as $Data) {
