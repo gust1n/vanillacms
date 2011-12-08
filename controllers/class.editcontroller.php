@@ -80,6 +80,7 @@ class EditController extends Gdn_Controller {
       $this->Index(null, 'page');
    }
    public function Index($PageID = '', $Type = '') {
+      $this->Permission('VanillaCMS.Pages.Manage');
       $this->MasterView = 'editpage';
       $this->AddSideMenu('edit/pages');
 
@@ -92,7 +93,6 @@ class EditController extends Gdn_Controller {
       $this->AddJsFile('jquery.autogrow.js');
       $this->AddJsFile('editpage.js');
 
-      //$this->View = 'editpage';
       $this->Page = FALSE;
 
       // Set the model on the form.
@@ -100,21 +100,20 @@ class EditController extends Gdn_Controller {
 
       // If were not adding, but editing an existing page
       if (is_numeric($PageID) && $PageID > 0) { 
-         if ($this->Page = $this->PageModel->GetByID($PageID)) { //If page exists
-            $this->Permission('VanillaCMS.Pages.Manage');
+         if ($this->Page = $this->PageModel->Get(array('PageID' => $PageID))->FirstRow()) { //If page exists
             $this->Title(T('Edit Page'));
             $this->Form->AddHidden('PageID', $this->Page->PageID);
-            
             //Set PageMeta
             $this->PageMetaData = $this->PageModel->GetPageMeta($this->Page->PageID);
             
          } else {
             Redirect('dashboard/home/filenotfound');
          }        
-      } else {
+      } 
+      /*else {
          $this->Form->AddHidden('Type', $Type);
          $this->SetData('Type', $this->Type = $Type, TRUE);
-      }
+      }*/
 
       // If seeing the form for the first time...
       if ($this->Form->AuthenticatedPostBack() === FALSE) {
@@ -127,16 +126,11 @@ class EditController extends Gdn_Controller {
 
       } 
       else { //If saving
-         $this->DeliveryType(DELIVERY_TYPE_BOOL);
-         $this->Validation = new Gdn_Validation();	
+         //$this->DeliveryType(DELIVERY_TYPE_BOOL);
+         //$this->Validation = new Gdn_Validation();	
+         //die(print_r($this->Form->FormValues()));         
+         if ($PageID = $this->Form->Save($this->PageModel)) { //Successful save
 
-       //  if($this->ValidateUniqueUrlCode($this->Form->GetFormValue('UrlCode')))
-         //   echo "Urlkoden måste vara unik";//$this->Form->AddError('ErrorCredentials');
-
-         
-         if ($PageID = $this->Form->Save()) { //Successful save
-            
-            //Rebuild the PageTree
             $this->PageModel->RebuildTree();
             
             //PAGEMETA
@@ -167,16 +161,14 @@ class EditController extends Gdn_Controller {
                
             $this->PageModel->SetRoute($PageID); //Auto set route to get rid of /page prefix
             
+            /*
             //PERMISSIONS
-            
-            
             $PermissionModel = Gdn::PermissionModel();
-                                    $Permissions = $PermissionModel->PivotPermissions(GetValue('Permission', $this->Form->FormValues(), array()), array('JunctionID' => $PageID));
-                                    $PermissionModel->SaveAll($Permissions, array('JunctionID' => $PageID, 'JunctionTable' => 'Page'));
-            
-                                   
+            $Permissions = $PermissionModel->PivotPermissions(GetValue('Permission', $this->Form->FormValues(), array()), array('JunctionID' => $PageID));
+            $PermissionModel->SaveAll($Permissions, array('JunctionID' => $PageID, 'JunctionTable' => 'Page'));
             //$Sender->SQL->Put('User', array('Permissions' => ''), array('Permissions <>' => ''));
-            
+            */
+                                   
             //Page Status (detect which button clicked)
             if ($this->Form->GetFormValue('Status') == 'published') {
                $this->StatusMessage = T('Page published at') .' ' . Gdn_Format::Date(); 
@@ -186,11 +178,10 @@ class EditController extends Gdn_Controller {
             
             
             if (!$this->Form->GetFormValue('PageID')) { //If new page, redirect
-               //$this->RedirectUrl = '../edit/pages';
                $this->RedirectUrl = Url('/edit/' . $PageID);
             }
             
-                   
+                  
          }
       }
             

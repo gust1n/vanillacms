@@ -264,6 +264,61 @@ class PageModel extends Gdn_Model {
 
       return $Right + 1;
    }
+   
+   
+   
+   
+   public function Save($FormPostValues) {
+      $Session = Gdn::Session();
+      
+      // Define the primary key in this model's table.
+      $this->DefineSchema();
+      
+      // Add & apply any extra validation rules:      
+      $this->Validation->ApplyRule('Body', 'Required');
+      
+      // Validate $PageID and whether this is an insert
+      $PageID = ArrayValue('PageID', $FormPostValues);
+      $PageID = is_numeric($PageID) && $PageID > 0 ? $PageID : FALSE;
+      $Insert = $PageID === FALSE;
+      if ($Insert)
+         $this->AddInsertFields($FormPostValues);
+      else
+         $this->AddUpdateFields($FormPostValues);
+      
+      // Prep and fire event
+      $this->EventArguments['FormPostValues'] = &$FormPostValues;
+      $this->EventArguments['PageID'] = $PageID;
+      $this->FireEvent('BeforeSavePage');
+      
+      // Validate the form posted values
+      if ($this->Validate($FormPostValues, $Insert)) {
+         
+            $Fields = $this->Validation->SchemaValidationFields();
+            
+            if ($Insert === FALSE) {
+               // Log the save.
+               LogModel::LogChange('Edit', 'Page', array_merge($Fields, array('PageID' => $PageID)));
+               // Save the new value.
+               $this->SQL->Put($this->Name, $Fields, array('PageID' => $PageID));
+            } else {
+                  $PageID = $this->SQL->Insert($this->Name, $Fields);
+                  $this->EventArguments['PageID'] = $PageID;
+
+                  $this->FireEvent('AfterSavePage');
+            }
+
+      }
+      
+      $PageID = GetValue('PageID', $FormPostValues);
+
+      return $PageID;
+   }
+   
+   
+   
+   
+   
 		
 	/**
 	 * Returns the published children of a selected parent page
