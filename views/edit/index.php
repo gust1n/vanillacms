@@ -158,17 +158,19 @@ if (!is_object($this->Page)) {
 	$ButtonText = T('Publish');
 } elseif ($this->Page->Status == 'draft') {
 	$Status = T('Draft');
-   $Time = Gdn_Format::Date($this->Page->DateUpdated);
+   $Time = Gdn_Format::Date($this->Page->DateUpdated > $this->Page->DateInserted ? $this->Page->DateUpdated : $this->Page->DateInserted);
 	$ButtonText = T('Publish');
 	//$Button = $this->Form->Button('Update page', array('class' => 'Button SaveButton', 'type' => 'submit'));
 } 
 else {
    $Status = T('Published');
-	$Time = Gdn_Format::Date($this->Page->DateUpdated);
+	//$Time = Gdn_Format::Date($this->Page->DateUpdated);
+	$Time = Gdn_Format::Date($this->Page->DateUpdated > $this->Page->DateInserted ? $this->Page->DateUpdated : $this->Page->DateInserted);
 	$ButtonText = T('Update');	
 }
+
 $ToPanel .= T('Status').': <span class="Publish Status">' . $Status . '</span><div class="clear"></div>';
-$ToPanel .= T('Last Saved').': <span class="Publish Time">' . $Time . '</span><div class="clear"></div>';
+$ToPanel .= T('Last Upated').': <span class="Publish Time">' . $Time . '</span><div class="clear"></div>';
 //$ToPanel .= $this->Form->Button('Save Draft', array('class' => 'Button Draft', 'type' => 'submit'));
 $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="draft" value="'.T('Save as Draft').'" class="Button Draft" />';
 $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="published" value="'.$ButtonText.'" class="Button SaveButton" />';

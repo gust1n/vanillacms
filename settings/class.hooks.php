@@ -91,6 +91,12 @@ class VanillaCMSHooks implements Gdn_IPlugin {
          
      }*/
   
+   public function SearchController_BeforeItemContent_Handler($Sender)
+   {
+      print_r($Sender->EventArguments['Row']);
+      
+   }
+  
    public function ProfileController_Render_Before($Sender) {
       $Sender->AddCSSFile('plugins/Voting/design/voting.css');
       $Sender->AddJSFile('plugins/Voting/voting.js');

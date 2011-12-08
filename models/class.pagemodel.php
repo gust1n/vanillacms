@@ -26,9 +26,11 @@ class PageModel extends Gdn_Model {
 		
 		// Build base query
 		$this->SQL
-			->Select('p.PageID as PrimaryID, p.Name as Title, p.Body as Summary')
+			->Select('p.PageID as PrimaryID, p.Name as Title')
+			->Select('p.Body as Summary')
 			->Select('p.UrlCode as Url')
-			->Select('p.DateInserted')
+			//->Select('p.UrlCode', "concat('/page/', %s)", 'Url')
+			->Select('p.DateInserted as DateInserted')
 			->Select('p.InsertUserID as UserID, u.Name, u.Photo')
 			->From('Page p')
 			->Join('User u', 'p.InsertUserID = u.UserID', 'left');
@@ -283,37 +285,42 @@ class PageModel extends Gdn_Model {
     */
    public function Save($FormPostValues) {
       $Session = Gdn::Session();
-      
+                  
       // Define the primary key in this model's table.
       $this->DefineSchema();
-      
-      // Add & apply any extra validation rules:      
-      $this->Validation->ApplyRule('Body', 'Required');
-      
+	
+      //$this->Validation->ApplyRule('Body', 'Required');
+                        
       // Validate $PageID and whether this is an insert
       $PageID = ArrayValue('PageID', $FormPostValues);
       $PageID = is_numeric($PageID) && $PageID > 0 ? $PageID : FALSE;
       $Insert = $PageID === FALSE;
+
       if ($Insert)
          $this->AddInsertFields($FormPostValues);
       else
          $this->AddUpdateFields($FormPostValues);
+         
       
+         
       // Prep and fire event
       $this->EventArguments['FormPostValues'] = &$FormPostValues;
       $this->EventArguments['PageID'] = $PageID;
       $this->FireEvent('BeforeSavePage');
       
+      $UrlCode = GetValue('UrlCode', $FormPostValues);
+      //die($UrlCode);
+
       // Validate the form posted values
-      if ($this->Validate($FormPostValues, $Insert)) {
-         
+      if ($this->Validate($FormPostValues, $Insert) && self::ValidateUniqueUrlCode($UrlCode, $PageID)) {
+            
             $Fields = $this->Validation->SchemaValidationFields();
             
             if ($Insert === FALSE) {
                // Log the save.
                LogModel::LogChange('Edit', 'Page', array_merge($Fields, array('PageID' => $PageID)));
                // Save the new value.
-               $this->SQL->Put($this->Name, $Fields, array('PageID' => $PageID));
+               $this->SQL->Put('Page', $Fields, array('PageID' => $PageID));
             } else {
                   $PageID = $this->SQL->Insert($this->Name, $Fields);
                   $this->EventArguments['PageID'] = $PageID;
@@ -323,9 +330,30 @@ class PageModel extends Gdn_Model {
 
       }
       
-      $PageID = GetValue('PageID', $FormPostValues);
-
       return $PageID;
+   }
+   
+   /**
+	 * Validates the uniqueness of the UrlCode 
+	 *
+	 * @param string $UrlCode Code to be checked
+	 * @param string $UrlCode (optional) If already is a page, prevent from getting own urlcode
+	 * @return bool
+	 * @author Jocke Gustin
+	 */
+   public function ValidateUniqueUrlCode($UrlCode, $PageID) {
+
+      $Valid = TRUE;
+      
+      if (isset($UrlCode)) {
+         $TestData = self::Get(array('UrlCode' => $UrlCode, 'Exclude' => $PageID));
+         if (is_object($TestData)) {
+            $this->Validation->AddValidationResult('UrlCode', T('The UrlCode you have entered is already in use'));
+            $Valid = FALSE;
+         }
+      }
+      
+      return $Valid;
    }
 			
 	/**

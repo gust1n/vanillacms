@@ -116,10 +116,10 @@ class PageController extends VanillaCMSController {
       $SideMenu->HighlightRoute($CurrentUrl);
 
       if($this->Page->ParentPageID) {
-         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->ParentPageID));
+         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->ParentPageID, 'Exclude' => -1));
          $ParentID = $this->Page->ParentPageID;
       } else {
-         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->PageID));
+         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->PageID, 'Exclude' => -1));
          $ParentID = $this->Page->PageID;
       }
       if(isset($Pages)) {

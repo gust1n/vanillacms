@@ -67,13 +67,6 @@ class EditController extends Gdn_Controller {
          
       $this->Render();
    }
-   public function AddPage() {
-      $this->Permission('VanillaCMS.Pages.Manage');
-      $this->Title(T('Add Page'));
-      // Use the edit form with no MessageID specified.
-      $this->View = 'editpage';
-      $this->EditPage();
-   }
    public function Add($Type = 'page')
    {
       $this->View = 'index';
@@ -126,11 +119,13 @@ class EditController extends Gdn_Controller {
 
       } 
       else { //If saving
-         //$this->DeliveryType(DELIVERY_TYPE_BOOL);
-         //$this->Validation = new Gdn_Validation();	
-         //die(print_r($this->Form->FormValues()));         
-         if ($PageID = $this->Form->Save($this->PageModel)) { //Successful save
+         $this->DeliveryType(DELIVERY_TYPE_BOOL);
+         $this->Validation = new Gdn_Validation();
+         $FormValues = $this->Form->FormValues();
+         $PageID = $this->PageModel->Save($FormValues);
 
+         if ($PageID) { //Successful save
+               
             $this->PageModel->RebuildTree();
             
             //PAGEMETA
@@ -178,11 +173,10 @@ class EditController extends Gdn_Controller {
             
             
             if (!$this->Form->GetFormValue('PageID')) { //If new page, redirect
-               $this->RedirectUrl = Url('/edit/' . $PageID);
-            }
-            
-                  
+               $this->RedirectUrl = Url('edit/' . $PageID);   
+            }     
          }
+         $this->ErrorMessage($this->Form->Errors());
       }
             
       //$this->PageModel->RebuildTree();
