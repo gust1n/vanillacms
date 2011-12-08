@@ -42,9 +42,6 @@ echo $this->Form->TextBox('Name',
 echo '<div id="UrlCodeContainer">';
 echo Wrap(T('Page Url:'), 'strong') . '  ';
 echo Gdn::Request()->Url('&nbsp;', TRUE);
-/*
-   TODO Fix handling of auto change urlcode when changing parent
-*/
 $UrlCodeExploded = explode('/', $this->Form->GetValue('UrlCode'));
 $ThisUrlCode = $UrlCodeExploded[count($UrlCodeExploded) - 1];
 $ParentUrlCode = substr($this->Form->GetValue('UrlCode'), 0, -strlen($ThisUrlCode));

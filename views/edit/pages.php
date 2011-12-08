@@ -62,21 +62,21 @@ $Session = Gdn::Session();
                echo "</li>";
             }
 
-            echo "\n".'<li id="list_'.$Page->PageID.'">';
+            echo "\n".'<li id="page_'.$Page->PageID.'">';
             // DEBUG: echo Wrap($Page->Name.' [countright: '.$CountRight.' lastcount: '.$LastRight.' opencount: '.$OpenCount.']', 'div');
-            $PageUrl = Url('categories/'.rawurlencode($Page->UrlCode).'/', TRUE);
+            $PageUrl = Url('/'.$Page->UrlCode, TRUE);
             $PageDate = $Page->DateUpdated > $Page->DateInserted ? $Page->DateUpdated : $Page->DateInserted;
             $Status = '';
             if ($Page->Status != 'published') {
                $Status = '(' . $Page->Status . ')';
             }
+            $InMenu = $Page->InMenu > 0 ? 'InMenu' : 'NotInMenu';
             echo Wrap(
-               '<table'.($OpenCount > 0 ? ' class="Indented '.$Page->Status.'"' : '').'>
+               '<table'.($OpenCount > 0 ? ' class="Indented '.$Page->Status.' ' . $InMenu. '"' : '').'>
                   <tr>
                      <td>
                         <strong>'.$Page->Name.'&nbsp;&nbsp;&nbsp;' . $Status . '</strong>
-                        '.Anchor(htmlspecialchars(rawurldecode($PageUrl)), $PageUrl).'
-                        './*Wrap("ID: {$Page->PageID}, PermID: {$Page->PermissionPageID}", 'div').*/'
+                        '.Anchor($PageUrl, $PageUrl, array('target' => '_blank')).'
                      </td>
                         <td class="AuthorDate">
                            <strong>'. T('By:') . ' ' . $Page->InsertUserName.'</strong>

@@ -42,7 +42,7 @@ class PageModel extends Gdn_Model {
 	}   
    
    /**
-    * Returns ALL pages, or by status
+    * Main Get-function. Pass arguments to alter function
     *
     * @return object SQL results.
     * @author Jocke Gustin
@@ -85,6 +85,85 @@ class PageModel extends Gdn_Model {
 	      return $Data;
 	}
 	
+	/**
+    * Saves the page tree based on a provided tree array. We are using the
+    * Nested Set tree model.
+    * THANKS VANILLAFORMS TEAM!
+    * @ref http://articles.sitepoint.com/article/hierarchical-data-database/2
+    * @ref http://en.wikipedia.org/wiki/Nested_set_model
+    *
+    * @since 2.0.16
+    * @access public
+    *
+    * @param array $TreeArray A fully defined nested set model of the category tree. 
+    */
+   public function SaveTree($TreeArray) {
+
+      $PermTree = $this->SQL->Select('PageID, TreeLeft, TreeRight, Depth, Sort, ParentPageID, UrlCode')->From('Page')->Where('Status <>', 'deleted')->Get();
+      $PermTree = $PermTree->Index($PermTree->ResultArray(), 'PageID');
+
+      usort($TreeArray, array('PageModel', '_TreeSort'));
+
+      foreach($TreeArray as $I => $Node) {
+         $PageID = GetValue('item_id', $Node);
+         if ($PageID == 'root')
+            $PageID = -1;
+            
+         $ParentPageID = GetValue('parent_id', $Node);
+         if (in_array($ParentPageID, array('root', 'none')))
+            $ParentPageID = -1;
+            
+         
+         
+         // Only update if the tree doesn't match the database.
+         $Row = $PermTree[$PageID];
+         if ($Node['left'] != $Row['TreeLeft'] || $Node['right'] != $Row['TreeRight'] || $Node['depth'] != $Row['Depth'] || $ParentPageID != $Row['ParentPageID'] || $Node['left'] != $Row['Sort'] || $PermCatChanged) {
+            
+            $Parent = self::Get(array('PageID' => $ParentPageID))->FirstRow();
+            
+            $PageUrlCodeExploded = explode('/', $PermTree[$PageID]['UrlCode']);
+	         $PageUrlCode = $PageUrlCodeExploded[count($PageUrlCodeExploded) - 1];
+            
+            if ($Parent->PageID == -1) {
+               $UrlCode = $PageUrlCode;
+            } else {
+               $UrlCode = $Parent->UrlCode . '/' . $PageUrlCode;
+            }
+                                    
+            $this->SQL->Update(
+               'Page',
+               array(
+                  'TreeLeft' => $Node['left'],
+                  'TreeRight' => $Node['right'],
+                  'Depth' => $Node['depth'],
+                  'Sort' => $Node['left'],
+                  'ParentPageID' => $ParentPageID,
+                  'UrlCode' => $UrlCode,
+               ),
+               array('PageID' => $PageID)
+            )->Put();
+            //And update page route
+            self::SetRoute($PageID);
+         }
+      }
+   }
+   /**
+    * Utility method for sorting via usort.
+    *
+    * @since 2.0.18
+    * @access protected
+    * @param $A First element to compare.
+    * @param $B Second element to compare.
+    * @return int -1, 1, 0 (per usort)
+    */
+   protected function _TreeSort($A, $B) {
+      if ($A['left'] > $B['left'])
+         return 1;
+      elseif ($A['left'] < $B['left'])
+         return -1;
+      else
+         return 0;
+   }
 	
 	/**
     * Rebuilds the Pagetree. We are using the Nested Set tree model.
@@ -111,6 +190,8 @@ class PageModel extends Gdn_Model {
       $Root = NULL;
       foreach ($Pages as &$Page) {
          if (!isset($Page['PageID']))
+            continue;
+         if ($Page['Status'] == 'deleted')
             continue;
          
          // Backup Page settings for efficient database saving.
@@ -183,44 +264,7 @@ class PageModel extends Gdn_Model {
 
       return $Right + 1;
    }
-	
-
-   /**
-    * Returns ALL parent pages or pages without children
-    *
-    * @return object SQL results.
-    * @author Jocke Gustin
-    */
-	public function GetAllParents($Status = '') {
-	    if (!in_array($Status, array('published', 'draft'))) {
-	       return $this->SQL
- 	         ->Select('p.*')
- 			   ->Select('uu.Name as UpdateUserName')
- 			   ->Select('ui.Name as InsertUserName')
- 			   ->LeftJoin('User uu', 'p.UpdateUserID = uu.UserID')
- 			   ->LeftJoin('User ui', 'p.InsertUserID = ui.UserID')
- 	         ->From('Page p')
-            ->Where('p.ParentPageID', 0)
-            ->Where('p.Status <>', 'deleted')
- 			   ->OrderBy('p.Sort')
- 	         ->Get();
-	    } else {
-	       return $this->SQL
- 	         ->Select('p.*')
- 			   ->Select('uu.Name as UpdateUserName')
- 			   ->Select('ui.Name as InsertUserName')
- 			   ->LeftJoin('User uu', 'p.UpdateUserID = uu.UserID')
- 			   ->LeftJoin('User ui', 'p.InsertUserID = ui.UserID')
- 	         ->From('Page p')
-            ->Where('p.ParentPageID', 0)
-            ->Where('p.Status', $Status)
-            ->Where('p.Status <>', 'deleted')
- 			   ->OrderBy('p.Sort')
- 	         ->Get();
-	    }
-	      
-	}	
-	
+		
 	/**
 	 * Returns the published children of a selected parent page
 	 *
@@ -355,22 +399,30 @@ class PageModel extends Gdn_Model {
 	}
 	
    /**
-    * Publishes or unpublishes pages
+    * Updates the page status to published, draft or deleted
     *
     * @param int $PageID Selected page
     * @param string $Status Status to be set, eg 'draft' or published
     * @return none
     * @author Jocke Gustin
     */
-	public function Status($PageID, $Status)
+	public function Update($Field = null, $PageID = null, $Value = null)
 	{
-	      $this->SQL->Update('Page')
-               ->Set('Status', $Status)
+	   
+	   $AvailableFields = array(
+	      'PageID', 'Name', 'UrlCode', 'Status', 'Type', 'InsertUserID', 'UpdateUserID', 'DateInserted', 'DateUpdated', 'ParentPageID', 'InMenu', 'AllowDiscussion', 'RouteIndex', 'Template', 'Body', 'Format', 'Sort' 
+	      );
+	      
+	   if (in_array($Field, $AvailableFields) && isset($PageID) && isset($Value)) {
+	      $Res = $this->SQL->Update('Page')
+               ->Set($Field, $Value)
                ->Where('PageID', $PageID)
                ->Put();
+         return true;
+	   }  
+	   return false;
 	}
-	
-	
+		
 /*
    public function AddModules($PageID, $Modules)
    {
@@ -451,21 +503,5 @@ class PageModel extends Gdn_Model {
             ->Where('PageID', $Page->PageID)
             ->Put();
       
-	}
-	/*
-	public function GetStaff($StaffRoleID)
-	  {
-	     return $this->SQL
-	        ->Select('u.*')
-	        ->Select('um.Value as FullName')
-	        ->Where('ur.RoleID', $StaffRoleID)
-	        ->Where('um.Name', 'FullName')
-	         ->From('User u')
-	         ->Join('UserRole ur', 'u.UserID = ur.UserID')
-	         ->LeftJoin('UserMeta um', 'u.UserID = um.UserID')
-	         //->GroupBy('UserID')
-	         ->OrderBy('u.UserID', 'desc')
-	         ->Get();
-	  }*/
-		
+	}	
 }

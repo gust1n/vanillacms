@@ -38,8 +38,10 @@ class EditController extends Gdn_Controller {
    {      
       $this->Permission('VanillaCMS.Pages.Manage');
       $this->AddSideMenu('edit/pages');
-      $this->AddJsFile('js/library/jquery.tablednd.js');
       $this->AddJsFile('pages.js');
+      $this->AddJsFile('js/library/jquery.alphanumeric.js');
+      $this->AddJsFile('js/library/nestedSortable.1.2.1/jquery-ui-1.8.2.custom.min.js');
+      $this->AddJsFile('js/library/nestedSortable.1.2.1/jquery.ui.nestedSortable.js');
       $this->AddCssFile('pages.css');
       $this->Title(T('Pages'));
 
@@ -83,14 +85,12 @@ class EditController extends Gdn_Controller {
 
       $this->AddCssFile('editpage.css');
 
-      //$this->AddJsFile('/js/library/jquery.ui.packed.js');
-
       $this->AddJsFile('applications/vanillacms/js/ckeditor/ckeditor.js', 'VanillaCMS');
       $this->AddJsFile('applications/vanillacms/js/ckeditor/adapters/jquery.js');
       
       $this->AddJsFile('jquery.alphanumeric.js');
       $this->AddJsFile('jquery.autogrow.js');
-      $this->AddJsFile('pages.js');
+      $this->AddJsFile('editpage.js');
 
       //$this->View = 'editpage';
       $this->Page = FALSE;
@@ -419,21 +419,55 @@ class EditController extends Gdn_Controller {
 
       if ($TransientKey !== FALSE && $Session->ValidateTransientKey($TransientKey)) {
          if ($Status == 'published' || $Status == 'draft' || $Status == 'deleted') {
-            $this->PageModel->Status($PageID, $Status);
-            if ($Status == 'draft') {
-               $this->PageModel->DeleteRoute($PageID);
-               $this->StatusMessage = 'Page unpublished and saved as draft';
-            } elseif ($Status == 'deleted') {
-               $this->PageModel->DeleteRoute($PageID);
-               
+
+            if ($this->PageModel->Update('Status', $PageID, $Status) == true) {
+               if ($Status == 'draft') {
+                  $this->PageModel->DeleteRoute($PageID);
+                  $this->StatusMessage = 'Page unpublished and saved as draft';
+               } elseif ($Status == 'deleted') {
+                  $this->PageModel->DeleteRoute($PageID);
+                  $this->PageModel->RebuildTree();
+                  $this->StatusMessage = 'Page deleted';
+               }
+               elseif ($Status == 'published') {
+                  $this->PageModel->SetRoute($PageID);
+                  $this->StatusMessage = 'Page Published';
+               }
+            } else {
+               return FALSE;
+               $this->StatusMessege = 'ERROR';
             }
-            elseif ($Status == 'published') {
-               $this->PageModel->SetRoute($PageID);
-               $this->StatusMessage = 'Page Published';
-            }	
+            	
          }	
       }
 
       $this->Render();      
+   }
+   
+   /**
+    * Sorting display order of pages.
+    * All cred to vanillaforums team!
+    * Accessed by ajax so its default is to only output true/false.
+    * 
+    * @access public
+    */
+   public function SortPages($PageID = null) {
+      // Check permission
+      $this->Permission('VanillaCMS.Pages.Manage');
+      
+      if (!$PageID) {
+         return false;
+      }
+
+      // Set delivery type to true/false
+      $this->_DeliveryType = DELIVERY_TYPE_BOOL;
+		$TransientKey = GetIncomingValue('TransientKey');
+      if (Gdn::Session()->ValidateTransientKey($TransientKey)) {
+			$TreeArray = GetValue('TreeArray', $_POST);
+			$this->PageModel->SaveTree($TreeArray);		
+		}
+         
+      // Renders true/false rather than template  
+      $this->Render();
    }
 }
