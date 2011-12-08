@@ -100,7 +100,7 @@ class EditController extends Gdn_Controller {
 
       // If were not adding, but editing an existing page
       if (is_numeric($PageID) && $PageID > 0) { 
-         if ($this->Page = $this->PageModel->Get(array('PageID' => $PageID))->FirstRow()) { //If page exists
+         if ($this->Page = $this->PageModel->Get(array('PageID' => $PageID))) { //If page exists
             $this->Title(T('Edit Page'));
             $this->Form->AddHidden('PageID', $this->Page->PageID);
             //Set PageMeta
@@ -262,7 +262,7 @@ class EditController extends Gdn_Controller {
    private function _ValidateUniqueUrlCode($UrlCode) {
       $Valid = FALSE;
 
-      $TestData = $this->PageModel->GetPublishedByUrlCode($UrlCode);
+      $TestData = $this->PageModel->Get(array('UrlCode' =>$UrlCode));
       if ($TestData) {
         // $this->Validation->AddValidationResult('Name', 'The name you entered is already in use by another member.');
          $Valid = TRUE;

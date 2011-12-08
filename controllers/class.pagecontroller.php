@@ -17,18 +17,18 @@ class PageController extends VanillaCMSController {
          Redirect('dashboard/home/filenotfound');
       }
 
-      $this->Page = $this->PageModel->GetPublishedByUrlCode(urldecode($UrlCode));
+      $this->Page = $this->PageModel->Get(array('UrlCode' => urldecode($UrlCode)));
 
       if(isset($this->Page)){   
             
          $this->AddCssFile('page.css');
 
          if (isset($ChildUrlCode)) {
-            $this->Page = $this->PageModel->GetPublishedByUrlCode(urldecode($UrlCode . '/' . $ChildUrlCode));
+            $this->Page = $this->PageModel->Get(array('UrlCode' => urldecode($UrlCode . '/' . $ChildUrlCode)));
          }
 
-         if ($this->Page->ParentPageID) {
-            $Parent = $this->PageModel->GetByID($this->Page->ParentPageID);
+         if ($this->Page->ParentPageID > 0) {            
+            $Parent = $this->PageModel->Get(array('PageID' => $this->Page->ParentPageID));
             $this->Menu->HighlightRoute('/' . $Parent->UrlCode);
          } else {
             $this->Menu->HighlightRoute('/' . $this->Page->UrlCode);
@@ -116,15 +116,15 @@ class PageController extends VanillaCMSController {
       $SideMenu->HighlightRoute($CurrentUrl);
 
       if($this->Page->ParentPageID) {
-         $Pages = $this->PageModel->GetPublishedChildren($this->Page->ParentPageID);
+         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->ParentPageID));
          $ParentID = $this->Page->ParentPageID;
       } else {
-         $Pages = $this->PageModel->GetPublishedChildren($this->Page->PageID);
+         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->PageID));
          $ParentID = $this->Page->PageID;
       }
       if(isset($Pages)) {
          if($Pages->NumRows() > 1) {
-            $Parent = $this->PageModel->GetByID($ParentID);
+            $Parent = $this->PageModel->Get(array('PageID' => $ParentID));
             $SideMenu->AddItem($Parent->Name, '<i class="rel Img Sprite Medium CurrentPage"></i>' . $Parent->Name, FALSE, array('class' => 'PageSideMenu mtm'));
 
             foreach($Pages->Result() as $Child) {

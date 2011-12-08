@@ -51,7 +51,8 @@ class PageModel extends Gdn_Model {
 	   
 	   $Defaults = array(
    		'OrderBy' => 'Sort', 'ParentPageID' => '',
-   		'PageID' => '', 'Exclude' => '', 'IncludeDeleted' => false
+   		'PageID' => '', 'Exclude' => '', 'IncludeDeleted' => false,
+   		'UrlCode' => ''
    	);
    	
    	$r = VanillaCMSController::ParseArgs($Args, $Defaults);	   	
@@ -65,12 +66,19 @@ class PageModel extends Gdn_Model {
 			   ->LeftJoin('User ui', 'p.InsertUserID = ui.UserID')
 	         ->From('Page p')
 			   ->OrderBy('p.' . $OrderBy);
+			   
+			$FirstRow = false;
 	      
 	      if (!$IncludeDeleted) {
 	        $this->SQL->Where('p.Status <>', 'deleted');
 	      }
 	      if ($PageID) {
 	        $this->SQL->Where('p.PageID', $PageID);
+	        $FirstRow = true;
+	      }
+	      if ($UrlCode) {
+	        $this->SQL->Where('p.UrlCode', $UrlCode);
+	        $FirstRow = true;
 	      }
 	      if ($ParentPageID) {
 	        $this->SQL->Where('p.ParentPageID', $ParentPageID);
@@ -82,6 +90,10 @@ class PageModel extends Gdn_Model {
 	         
 	      $Data = $this->SQL->Get();
 	      
+	      if ($FirstRow) {
+	        $Data = $Data->FirstRow();
+	      }
+	      
 	      return $Data;
 	}
 	
@@ -89,10 +101,6 @@ class PageModel extends Gdn_Model {
     * Saves the page tree based on a provided tree array. We are using the
     * Nested Set tree model.
     * THANKS VANILLAFORMS TEAM!
-    * @ref http://articles.sitepoint.com/article/hierarchical-data-database/2
-    * @ref http://en.wikipedia.org/wiki/Nested_set_model
-    *
-    * @since 2.0.16
     * @access public
     *
     * @param array $TreeArray A fully defined nested set model of the category tree. 
@@ -119,7 +127,7 @@ class PageModel extends Gdn_Model {
          $Row = $PermTree[$PageID];
          if ($Node['left'] != $Row['TreeLeft'] || $Node['right'] != $Row['TreeRight'] || $Node['depth'] != $Row['Depth'] || $ParentPageID != $Row['ParentPageID'] || $Node['left'] != $Row['Sort'] || $PermCatChanged) {
             
-            $Parent = self::Get(array('PageID' => $ParentPageID))->FirstRow();
+            $Parent = self::Get(array('PageID' => $ParentPageID));
             
             $PageUrlCodeExploded = explode('/', $PermTree[$PageID]['UrlCode']);
 	         $PageUrlCode = $PageUrlCodeExploded[count($PageUrlCodeExploded) - 1];
@@ -168,8 +176,6 @@ class PageModel extends Gdn_Model {
 	/**
     * Rebuilds the Pagetree. We are using the Nested Set tree model.
     * Built by the vanillaforums.org team
-    * @ref http://articles.sitepoint.com/article/hierarchical-data-database/2
-    * @ref http://en.wikipedia.org/wiki/Nested_set_model
     *  
     * @since 2.0.0
     * @access public
@@ -265,9 +271,16 @@ class PageModel extends Gdn_Model {
       return $Right + 1;
    }
    
-   
-   
-   
+   /**
+    * Insert or update core data about the page.
+    * 
+    * Events: BeforeSavePage, AfterSavePage.
+    * 
+    * @access public
+    *
+    * @param array $FormPostValues Data from the form model.
+    * @return int $PageID
+    */
    public function Save($FormPostValues) {
       $Session = Gdn::Session();
       
@@ -314,91 +327,7 @@ class PageModel extends Gdn_Model {
 
       return $PageID;
    }
-   
-   
-   
-   
-   
-		
-	/**
-	 * Returns the published children of a selected parent page
-	 *
-	 * @param int $ParentPageID Selected parent page
-	 * @return children by object SQL results.
-	 * @author Jocke Gustin
-	 */
-	public function GetPublishedChildren($ParentPageID)
-	{
-		return $this->SQL
-	      ->Select('p.*')
-	      ->Select('uu.Name as UpdateUserName')
-   		->Select('ui.Name as InsertUserName')
-   		->LeftJoin('User uu', 'p.UpdateUserID = uu.UserID')
-   		->LeftJoin('User ui', 'p.InsertUserID = ui.UserID')
-	      ->From('Page p')
-			->Where('p.ParentPageID', $ParentPageID)
-			->Where('p.Status', 'published')
-			->OrderBy('p.Sort')
-	      ->Get();
-	}
-	
-	/**
-	 * Returns ALL children of a selected parent page
-	 *
-	 * @return children by object SQL results.
-	 * @author Jocke Gustin
-	 **/
-	public function GetAllChildren($ParentPageID)
-	{
-	   return $this->SQL
-	      ->Select('p.*')
-	      ->Select('uu.Name as UpdateUserName')
-   		->Select('ui.Name as InsertUserName')
-   		->LeftJoin('User uu', 'p.UpdateUserID = uu.UserID')
-   		->LeftJoin('User ui', 'p.InsertUserID = ui.UserID')
-	      ->From('Page p')
-			->Where('p.ParentPageID', $ParentPageID)
-			->OrderBy('p.Sort')
-	      ->Get();
-	}
-	
-	
-	/**
-	 * Returns a single page by ID
-	 * 
-	 * @return object SQL results.
-	 * @param int $PageID 
-	 * @author Jocke Gustin
-	 */
-	public function GetByID($PageID) {
-	      return $this->SQL
-	         ->Select()
-	         ->From('Page')
-			->Where('PageID', $PageID)
-	         ->Get()
-			->FirstRow();
-	}
-   /**
-    * Returns single page
-    * 
-    * @return object SQL results.
-    * @param string $UrlCode from addressbar
-    * @author Jocke Gustin
-    */
-	public function GetPublishedByUrlCode($UrlCode)
-	{
-		return $this->SQL
-			->Select('p.*')
-			->From('Page p')
-			->Where('p.UrlCode', $UrlCode)
-			->Where('Status', 'published')
-			->BeginWhereGroup()
-         //->Permission('VanillaCMS.Page.View', 'p', 'PageID')
-         ->EndWhereGroup()
-			->Get()
-			->FirstRow();
-	}
-	
+			
 	/**
 	 * Adds meta information to pages
 	 *
@@ -454,7 +383,7 @@ class PageModel extends Gdn_Model {
 	}
 	
    /**
-    * Updates the page status to published, draft or deleted
+    * Updates selected field with passed value
     *
     * @param int $PageID Selected page
     * @param string $Status Status to be set, eg 'draft' or published
@@ -465,7 +394,12 @@ class PageModel extends Gdn_Model {
 	{
 	   
 	   $AvailableFields = array(
-	      'PageID', 'Name', 'UrlCode', 'Status', 'Type', 'InsertUserID', 'UpdateUserID', 'DateInserted', 'DateUpdated', 'ParentPageID', 'InMenu', 'AllowDiscussion', 'RouteIndex', 'Template', 'Body', 'Format', 'Sort' 
+	      'PageID', 'Name', 'UrlCode', 'Status', 
+	      'Type', 'InsertUserID', 'UpdateUserID', 
+	      'DateInserted', 'DateUpdated', 'ParentPageID', 
+	      'InMenu', 'AllowDiscussion', 
+	      'RouteIndex', 'Template', 'Body', 
+	      'Format', 'Sort' 
 	      );
 	      
 	   if (in_array($Field, $AvailableFields) && isset($PageID) && isset($Value)) {
@@ -478,31 +412,6 @@ class PageModel extends Gdn_Model {
 	   return false;
 	}
 		
-/*
-   public function AddModules($PageID, $Modules)
-   {
-      $this->SQL->Update('Page')
-            ->Set('Modules', $Modules)
-            ->Where('PageID', $PageID)
-            ->Put();
-   }*/
-
-/*
-   public function CheckForModules($PageID)
-   {
-      $Check = $this->SQL
-            ->Select()
-            ->From('Page')
-         ->Where('Modules', 'a:0:{}')
-         ->Where('PageID', $PageID)
-            ->Get()
-         ->FirstRow();
-         if($Check)
-            return FALSE;
-         else
-            return TRUE;
-   }*/
-
    /**
     * Autosets the route to ex /hello/world instead of /page/hello/world
     *
@@ -512,7 +421,7 @@ class PageModel extends Gdn_Model {
     */
 	public function SetRoute($PageID)
 	{
-	   $Page = $this->GetByID($PageID);
+	   $Page = self::Get(array('PageID' =>$PageID));
 	   
 	   Gdn::Router()->SetRoute( //Set new route, see Gdn::Router for more info
          $Page->UrlCode,
@@ -550,7 +459,7 @@ class PageModel extends Gdn_Model {
 	 */
 	public function DeleteRoute($PageID)
 	{
-	   $Page = $this->GetByID($PageID);
+	   $Page = self::Get(array('PageID' =>$PageID));
 	   
       Gdn::Router()->DeleteRoute($Page->RouteIndex);
       $this->SQL->Update('Page')
