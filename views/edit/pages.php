@@ -70,9 +70,13 @@ $Session = Gdn::Session();
             if ($Page->Status != 'published') {
                $Status = '(' . $Page->Status . ')';
             }
-            $InMenu = $Page->InMenu > 0 ? 'InMenu' : 'NotInMenu';
+            if ($Page->InMenu != 1) {
+               $Status .= '(' . T('Not visible in menu') . ')';
+            }
+            $InMenu = $Page->InMenu != 0 ? ' InMenu' : 'NotInMenu';
+            
             echo Wrap(
-               '<table'.($OpenCount > 0 ? ' class="Indented '.$Page->Status.' ' . $InMenu. '"' : '').'>
+               '<table class="'.($OpenCount > 0 ? 'Indented '.$Page->Status.'' : '').  $InMenu . '">
                   <tr>
                      <td>
                         <strong>'.$Page->Name.'&nbsp;&nbsp;&nbsp;' . $Status . '</strong>

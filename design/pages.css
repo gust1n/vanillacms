@@ -1,3 +1,4 @@
 table.draft {border-color:#ccc;background:#eee}
 table.draft td{background:#eee}
+/*ol.Sortable table.NotInMenu{border: 1px dotted #000;}*/
 ol.Sortable td.AuthorDate{position: absolute;right: 200px;text-align: right;}
