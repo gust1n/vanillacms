@@ -1,11 +1,16 @@
 <?php if (!defined('APPLICATION')) exit();
 
-/**
- * VanillaCMS.Modules
- */
+$ModuleInfo['YoutubeModule'] = array(
+	'Name' => 'YouTube Embed',
+   'Description' => "Embeds YouTube-video",
+   'HelpText' => "YouTube video-ID",
+   'ShowAssets' => true,
+   'ContentType' => "text",
+   'Author' => "Jocke Gustin"
+);
 
 /**
- * Renders the image of the current topic
+ * Outputs YouTube embed from YouTubeID
  */
 class YoutubeModule extends Gdn_Module {
 

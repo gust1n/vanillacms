@@ -102,24 +102,12 @@ label {
   float:right;
   font-weight:none;
 }
-#QuotePromtText {
-  font-size:16px;
-  padding:7px 0 2px 4px;
-}
 input.PageName {
 	font-size:22px;
 	margin:0;
 	width:30%;
 	float:left;
 	margin-bottom:5px;
-}
-input.Quote {
-	font-size:16px;
-	float:left;
-	margin:0;
-
-	width:70%;
-	margin:5px 0;
 }
 div#UrlCodeContainer {
    float:left;

@@ -381,7 +381,6 @@ class EditController extends Gdn_Controller {
    {
 
       return array(
-         'Quote' => T('QuoteAsset'),
          'FullWidth' => T('Full Width'),
          'Content' => T('Content'),
          'AfterContent' => T('After Content'),

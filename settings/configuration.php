@@ -4,8 +4,4 @@
 
 $Configuration['VanillaCMS']['Installed'] = '0';
 
-$Configuration['VanillaCMS']['Media']['Image']['MaxWidth'] = 2500;
-$Configuration['VanillaCMS']['Media']['Image']['MaxHeight'] = 2000;
-$Configuration['VanillaCMS']['News']['CategoryID'] = 3;
-$Configuration['VanillaCMS']['Start']['Quote'] = 'Vanilla CMS is a content management system for the Vanilla Forums framework';
 $Configuration['VanillaCMS']['Copyright'] = '© '.date('Y').' Vanilla CMS by <a href="http://jockegustin.se">Jocke Gustin</a>';
