@@ -123,7 +123,7 @@ class PageController extends VanillaCMSController {
          $ParentID = $this->Page->PageID;
       }
       if(isset($Pages)) {
-         if($Pages->NumRows() > 1) {
+         if($Pages->NumRows() > 0) {
             $Parent = $this->PageModel->Get(array('PageID' => $ParentID));
             $SideMenu->AddItem($Parent->Name, '<i class="rel Img Sprite Medium CurrentPage"></i>' . $Parent->Name, FALSE, array('class' => 'PageSideMenu mtm'));
 
