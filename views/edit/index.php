@@ -14,11 +14,14 @@ foreach ($this->AvailableModules as $key => $value) {
 setcookie("admin", "1", time()+3600, '/');
 if (is_object($this->Page)) {
 	$HeaderText = T('Edit') . ': ' . $this->Page->Name;
-	echo '<style type="text/css">.PromtText{display:none}</style>';	
+	//echo '<style type="text/css">.PromtText{display:none}</style>';	
 } else {
    $HeaderText = T('Add '. $this->Type);
-   echo "<script type='text/javascript'>jQuery(document).ready(function($) { $('#Form_Permission').attr('checked', true); });</script>";
-}		
+   //echo "<script type='text/javascript'>jQuery(document).ready(function($) { $('#Form_Permission').attr('checked', true); });</script>";
+}
+if ($this->Page->Template == 'discussions' || $this->Page->Template == 'conversations') {
+   echo '<style type="text/css">.ParentNotOptional{display:none}</style>';
+}
 ?>
 <h1 id="MainHeader"><?php echo $HeaderText; ?></h1>
 
@@ -177,7 +180,7 @@ $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="published" value="'.
 //$ToPanel .= $this->Form->Button($ButtonText, array('class' => 'Button SaveButton', 'type' => 'submit'));
 $ToPanel .= '</div>';
 $ToPanel .= '<div class="Box" id="PageAttributes"><h2>' . T('Page Options (optional)') . '</h2>';
-$ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<div class="ParentNotOptional"><ul><li>';
+$ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<ul><li class="ParentNotOptional">';
 $ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Discussion'), array('value' => '1')) . '</li><li>';
 $ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="-1">';
 $ToPanel .= '<option value="-1" data-url="">'.T('None').'</option>';            
@@ -253,7 +256,7 @@ $ToPanel .= $this->Form->Label('Template', 'Template') . $this->Form->Dropdown('
 
 //$ToPanel .=  $this->Form->Label('Custom Css', 'CustomCss') . $this->Form->TextBox('CustomCss', array('class' => 'InputBox CustomCss'));
 
-$ToPanel .= '</li></ul></div></div>';
+$ToPanel .= '</li></ul></div>';
 
 /*
 if(count($this->PermissionData) > 0) {

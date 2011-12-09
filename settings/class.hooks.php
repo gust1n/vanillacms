@@ -20,7 +20,7 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       
       $PageModel = new PageModel();
       /*
-         TODO Build in menusystem only supports one-level deep nesting
+         TODO The built in menusystem only supports one-level deep nesting
       */
       $LastDepth = 1;
       $LastParentID = '';
@@ -40,7 +40,7 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       }
       
       //Removes the default conversations and discussions menu items from vanilla and conversations applications
-      $Sender->Menu->RemoveGroup('Conversations');
+      //$Sender->Menu->RemoveGroup('Conversations');
       $Sender->Menu->RemoveLinks('Discussions');
    }
 

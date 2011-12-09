@@ -84,6 +84,7 @@ class EditController extends Gdn_Controller {
       
       $this->AddJsFile('jquery.alphanumeric.js');
       $this->AddJsFile('jquery.autogrow.js');
+      $this->AddJsFile('jquery.ui.packed.js');
       $this->AddJsFile('editpage.js');
 
       $this->Page = FALSE;
@@ -267,24 +268,52 @@ class EditController extends Gdn_Controller {
    
    private function _AvailableTemplates($GetPlugin = NULL, $ForceReindex = FALSE) {
          $AvailableTemplates = array();
+         $AvailableTemplates['default'] = T('Default');
   
          $Info = array();
          $InverseRelation = array();
-         if ($FolderHandle = opendir(PATH_VanillaCMSS . DS . $this->VanillaCMS . DS . 'views')) {
+         $CurrentTheme = C('Garden.Theme', '');
+         /*
+         $TemplatePaths = array(); // Potential places where the templates can be found in the filesystem.
+                  $CurrentTheme = ''; // The currently selected theme
+                  
+                  if ($CurrentTheme != '') {
+                     // Look for CSS in the theme folder:
+                     $CssPaths[] = PATH_THEMES . DS . $CurrentTheme . DS . 'design' . DS . $MasterViewCss;
+                     
+                     // Look for Master View in the theme folder:
+                     $MasterViewPaths[] = PATH_THEMES . DS . $CurrentTheme . DS . 'views' . DS . $MasterViewName;
+                  }
+               
+                  
+               // Look for CSS in the dashboard design folder.
+               $CssPaths[] = PATH_APPLICATIONS . DS . 'dashboard' . DS . 'design' . DS . $MasterViewCss;*/
+         
+         
+         if ($FolderHandle = opendir(PATH_THEMES . DS . $CurrentTheme . DS . 'views')) {
             if ($FolderHandle === FALSE)
                return $Info;
             
             // Loop through subfolders (ie. the actual plugin folders)
             while (($Item = readdir($FolderHandle)) !== FALSE) {   
                if (in_array($Item, array('.', '..')))
-                  continue;        
-               $Name = substr($Item,0,-11 );
-               $AvailableTemplates[$Name] = $Name;
+                  continue;    
+                  
+               $Check = substr($Item,-11 );
+               if ($Check == '.master.php') {
+                  $Name = substr($Item,0,-11 );
+                  $AvailableTemplates[$Name] = $Name;
+               }
+               
             }
             closedir($FolderHandle);
             
-            return $AvailableTemplates;
          }
+         //Add the default templates for total menu-control
+         $AvailableTemplates['discussions'] = T('All Discussions');
+         $AvailableTemplates['conversations'] = T('Conversations');
+
+         return $AvailableTemplates;
    }
    
    /**
