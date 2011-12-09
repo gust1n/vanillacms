@@ -26,15 +26,13 @@ class PageModel extends Gdn_Model {
 		
 		// Build base query
 		$this->SQL
-			->Select('p.PageID as PrimaryID, p.Name as Title')
-			->Select('p.Body as Summary')
-			->Select('p.UrlCode as Url')
-			//->Select('p.UrlCode', "concat('/page/', %s)", 'Url')
-			->Select('p.DateInserted as DateInserted')
-			->Select('p.InsertUserID as UserID, u.Name, u.Photo')
+		   ->Select('p.PageID as PrimaryID, p.Name as Title, p.Body as Summary, "page", null')
+		   ->Select("'/page/', p.UrlCode", "concat", 'Url')
+		   ->Select('p.DateInserted')
+			->Select('p.InsertUserID as UserID')
 			->From('Page p')
-			->Join('User u', 'p.InsertUserID = u.UserID', 'left');
-		
+			->Join('Discussion d', 'd.DiscussionID = p.PageID');
+		   		
 		// Execute query
 		$Result = $this->SQL->GetSelect();
 		$Result->Sender = 'page';

@@ -201,7 +201,6 @@ class EditController extends Gdn_Controller {
                $this->RedirectUrl = Url('edit/' . $PageID);  
                unset($this->SavedPage);
             } else {
-               //die('cool');
                $NewActivityID = $this->ActivityModel->Add(
                   Gdn::Session()->UserID,
                   'EditPage',

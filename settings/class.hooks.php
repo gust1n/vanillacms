@@ -40,63 +40,10 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       }
       
       //Removes the default conversations and discussions menu items from vanilla and conversations applications
-      //$Sender->Menu->RemoveGroup('Conversations');
+      $Sender->Menu->RemoveGroup('Conversations');
       $Sender->Menu->RemoveLinks('Discussions');
    }
-
-  /*
-   public function DiscussionsController_Render_Before(&$Sender)
-     {
-        $Sender->FetchViewLocation('test', 'vanilla', 'vanillacms');
-        $Sender->View = 'test';
-        
-     }*/
-  
-
-  /*
-   public function DiscussionController_BeforeCommentMeta_Handler(&$Sender)
-     {
-        //echo $Sender->EventArguments['Author']->Photo;
-
-
-        $PermissionModel = new RoleModel();
-        $Roles = $PermissionModel->GetByUserID($Sender->EventArguments['Author']->UserID);
-        $Moderator = FALSE;
-        // print_r($Roles->Result());
-        foreach ($Roles->Result() as $Role) {
-           if($Role->RoleID == 32) {
-              $Moderator = TRUE;
-           }   
-        }
-        if ($Moderator == TRUE) {
-           echo '<div class="Moderator">';
-           echo '<div class="ModeratorImgContainer">' . UserPhoto($Sender->EventArguments['Author'], 'ModeratorImg') . 'Moderator</div>';
-        }
-        else
-           echo UserPhoto($Sender->EventArguments['Author'], 'Show');
-     }
-
-     public function DiscussionController_AfterCommentMeta_Handler(&$Sender)
-     {
-        $PermissionModel = new RoleModel();
-        $Roles = $PermissionModel->GetByUserID($Sender->EventArguments['Author']->UserID);
-
-        foreach ($Roles->Result() as $Role) {
-           if($Role->RoleID == 32) {
-              // echo UserPhoto($Sender->EventArguments['Author'], 'ModeratorImg');
-              echo '<span class="Moderator">'.$Role->Name.'</span></div>';
-
-           }
-        } 
-         
-     }*/
-  
-   public function SearchController_BeforeItemContent_Handler($Sender)
-   {
-      print_r($Sender->EventArguments['Row']);
-      
-   }
-  
+     
    public function ProfileController_Render_Before($Sender) {
       $Sender->AddCSSFile('plugins/Voting/design/voting.css');
       $Sender->AddJSFile('plugins/Voting/voting.js');
@@ -182,7 +129,13 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       echo $Sender->RenderAsset('AfterCommentMeta');
    }
 
-  
+   public function SearchController_BeforeItemContent_Handler($Sender)
+   {
+      if ($Sender->EventArguments['Row']->Format == 'page') {
+         $Sender->EventArguments['Row']->Summary = substr(trim($Sender->EventArguments['Row']->Summary), 0,150); 
+      }
+   }
+   
    public function SearchModel_Search_Handler($Sender) {
         $PageModel = new PageModel();
         $PageModel->Search($Sender);
