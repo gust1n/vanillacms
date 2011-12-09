@@ -17,7 +17,7 @@ class PageController extends VanillaCMSController {
          Redirect('dashboard/home/filenotfound');
       }
 
-      $this->Page = $this->PageModel->Get(array('UrlCode' => urldecode($UrlCode)));
+      $this->Page = $this->PageModel->Get(array('UrlCode' => urldecode($UrlCode), 'Status' => 'published'));
 
       if(isset($this->Page)){   
             
@@ -115,11 +115,11 @@ class PageController extends VanillaCMSController {
       $SideMenu->AutoLinkGroups = FALSE;
       $SideMenu->HighlightRoute($CurrentUrl);
 
-      if($this->Page->ParentPageID) {
-         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->ParentPageID, 'Exclude' => -1));
+      if($this->Page->ParentPageID != -1) {
+         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->ParentPageID, 'Exclude' => -1, 'Status' => 'published'));
          $ParentID = $this->Page->ParentPageID;
       } else {
-         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->PageID, 'Exclude' => -1));
+         $Pages = $this->PageModel->Get(array('ParentPageID' => $this->Page->PageID, 'Exclude' => -1, 'Status' => 'published'));
          $ParentID = $this->Page->PageID;
       }
       if(isset($Pages)) {
