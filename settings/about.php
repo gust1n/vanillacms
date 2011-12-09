@@ -1,8 +1,8 @@
 <?php
 $ApplicationInfo['VanillaCMS'] = array(
 	'Name' => 'Vanilla CMS',
-   'Description' => "CMS-application with pages, menus and widgets",
-   'Version' => '0.5b',
+   'Description' => "Content Management System with pages, menus, templates and widgets",
+   'Version' => '1.0b1',
    'RegisterPermissions' => FALSE,
    'SetupController' => 'setup',
    'Author' => "Jocke Gustin",

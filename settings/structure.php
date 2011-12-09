@@ -8,12 +8,14 @@ if (!isset($Drop))
    
 if (!isset($Explicit))
    $Explicit = TRUE;
+   
+$SQL = Gdn::Database()->SQL();
+$Construct = Gdn::Database()->Structure();
 
-$SQL = $Database->SQL();
-$Construct = $Database->Structure();
+$Construct->Table('Page');
+$PageTableExists = $Construct->TableExists();
 
-$Construct->Table('Page')
-	->PrimaryKey('PageID')
+$Construct->PrimaryKey('PageID')
    ->Column('Name', 'varchar(150)', FALSE, 'fulltext')
 	->Column('UrlCode', 'varchar(150)')
 	->Column('Status', 'varchar(20)', 'published')
@@ -35,6 +37,23 @@ $Construct->Table('Page')
 	->Column('Sort', 'int', TRUE)
 	->Engine('MyISAM')
 	->Set($Explicit, $Drop);
+	
+if ($SQL->GetWhere('Page', array('PageID' => -1))->NumRows() == 0) {
+   $SQL->Insert('Page', array('PageID' => -1, 'TreeLeft' => 1, 'TreeRight' => 8, 'Depth' => 0, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Root', 'UrlCode' => '', 'Body' => 'Root of category tree. Users should never see this.'));
+}
+if ($Drop || !$PageTableExists) {
+   $PageModel = new PageModel($this);
+   
+   $SQL->Insert('Page', array('PageID' => 1, 'TreeLeft' => 2, 'TreeRight' => 7, 'Depth' => 1, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Example Page', 'UrlCode' => 'example-page', 'InMenu' => 1, 'ParentPageID' => -1, 'Body' => '<h1>Hello World!</h1><p>This is your first page, enter the dashboard to edit or add pages!</p>'));
+   
+   $PageModel->SetRoute(1);
+   
+   $SQL->Insert('Page', array('PageID' => 2, 'TreeLeft' => 3, 'TreeRight' => 4, 'Depth' => 2, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Discussions', 'UrlCode' => 'discussions', 'InMenu' => 1, 'ParentPageID' => 1, 'Body' => 'This is the example page of the Discussion template. This text should not be visible... Anywhere! (Unless you change the page template)'));
+   
+   $SQL->Insert('Page', array('PageID' => 3, 'TreeLeft' => 5, 'TreeRight' => 6, 'Depth' => 2, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Inbox', 'UrlCode' => 'messages/all', 'InMenu' => 1, 'ParentPageID' => 1, 'Body' => 'This is the example page of the Inbox template. This text should not be visible... Anywhere! (Unless you change the page template)'));
+}
+
+
 	
 $Construct->Table('PageMeta')
 	->PrimaryKey('PageMetaID')
@@ -65,11 +84,8 @@ $Construct->Table('Discussion')
 
 // X added a discussion
 
-/*
-   TODO Fix Activitys on page edits
-*/
 if ($SQL->GetWhere('ActivityType', array('Name' => 'NewPage'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '1', 'Name' => 'NewPage', 'FullHeadline' => T('%1$s added a %8$s.'), 'ProfileHeadline' => T('%1$s added a %8$s.'), 'RouteCode' => 'page', 'Public' => '1'));
+   $SQL->Insert('ActivityType', array('AllowComments' => '1', 'Name' => 'NewPage', 'FullHeadline' => '%1$s added a %8$s.', 'ProfileHeadline' => '%1$s added a %8$s.', 'RouteCode' => 'page', 'Public' => '1'));
 
 if ($SQL->GetWhere('ActivityType', array('Name' => 'EditPage'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '1', 'Name' => 'EditPage', 'FullHeadline' => '%1$s edited a %8$s.', 'ProfileHeadline' => '%1$s edited a %8$s.', 'RouteCode' => 'page', 'Public' => '1'));
@@ -80,82 +96,11 @@ $PermissionModel->SQL = $SQL;
 
 // Define some global VanillaCMS permissions.
 $PermissionModel->Define(array(
-	'VanillaCMS.Pages.Manage',
-	'VanillaCMS.Internal.View'
+	'VanillaCMS.Pages.Manage'
 ));
 
-/*
-$PermissionModel->Define(array(
-   'VanillaCMS.Page.View' => 1,
-   'VanillaCMS.Page.Edit' => 0),
-   'tinyint',
-   'Page',
-   'PageID'
-   );*/
-
-//$SQL->Update('User', array('Permissions' => ''))->Put();   
-
-// Set the initial guest permissions.
-/*
-$PermissionModel->Save(array(
-   'Role' => 'Guest',
-   'JunctionTable' => 'Page',
-   'JunctionColumn' => 'PageID',
-   'VanillaCMS.Page.Edit' => 1
-   ), TRUE);
-
-$PermissionModel->Save(array(
-   'Role' => 'Confirm Email',
-   'JunctionTable' => 'Page',
-   'JunctionColumn' => 'PageID',
-   'VanillaCMS.Page.Edit' => 1
-   ), TRUE);
-
-$PermissionModel->Save(array(
-   'Role' => 'Applicant',
-   'JunctionTable' => 'Page',
-   'JunctionColumn' => 'PageID',
-   'VanillaCMS.Page.Edit' => 1
-   ), TRUE);
-
-// Set the intial member permissions.
-$PermissionModel->Save(array(
-   'Role' => 'Member',
-   'JunctionTable' => 'Page',
-   'JunctionColumn' => 'PageID',
-   'Vanilla.Discussions.Add' => 1,
-   'VanillaCMS.Page.Edit' => 1,
-   'Vanilla.Comments.Add' => 1
-   ), TRUE);
-   
-// Set the initial moderator permissions.
-$PermissionModel->Save(array(
-   'Role' => 'Moderator',
-   'Vanilla.Spam.Manage' => 1,
-   ), TRUE);
-   
 // Set the initial administrator permissions.
 $PermissionModel->Save(array(
    'Role' => 'Administrator',
-   'Vanilla.Settings.Manage' => 1,
-   'Vanilla.Categories.Manage' => 1,
-   'VanillaCMS.Page.Edit' => 1,
+   'VanillaCMS.Pages.Manage' => 1
    ), TRUE);
-
-/*
-$PermissionModel->Save(array(
-   'Role' => 'Administrator',
-   'JunctionTable' => 'Category',
-   'JunctionColumn' => 'PageID',
-   'JunctionID' => $GeneralCategoryID,
-   'Vanilla.Discussions.Add' => 1,
-   'Vanilla.Discussions.Edit' => 1,
-   'Vanilla.Discussions.Announce' => 1,
-   'Vanilla.Discussions.Sink' => 1,
-   'Vanilla.Discussions.Close' => 1,
-   'Vanilla.Discussions.Delete' => 1,
-   'VanillaCMS.Page.Edit' => 1,
-   'Vanilla.Comments.Add' => 1,
-   'Vanilla.Comments.Edit' => 1,
-   'Vanilla.Comments.Delete' => 1
-   ), TRUE);*/

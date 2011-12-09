@@ -139,6 +139,8 @@ class EditController extends Gdn_Controller {
                
             $this->PageModel->RebuildTree();
             
+            $this->SavedPage = $this->PageModel->Get(array('PageID' => $PageID));
+            
             //PAGEMETA
             $this->PageModel->ClearPageMeta($PageID);
             if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
@@ -151,9 +153,8 @@ class EditController extends Gdn_Controller {
                   $SingleMeta['MetaAsset'] = $ExplodedMeta[3];
                   $SingleMeta['MetaAssetName'] = $ExplodedMeta[4];
                   
-                  echo $SingleMeta['MetaValue'];
-                  
-                  
+                  //echo $SingleMeta['MetaValue'];
+                   
                   $NewArray[$ExplodedMeta[0]] = $SingleMeta;
                }
             }
@@ -162,7 +163,7 @@ class EditController extends Gdn_Controller {
             }
             
             //ROUTES
-            if (isset($this->Page->RouteIndex))
+            if (isset($this->SavedPage->RouteIndex))
                $this->PageModel->DeleteRoute($PageID); //Always delete route in case UrlCode is changed
                
              $this->PageModel->SetRoute($PageID); //Auto set route to get rid of /page prefix
@@ -178,40 +179,38 @@ class EditController extends Gdn_Controller {
             */
                                    
             //Page Status (detect which button clicked)
-            if ($this->Form->GetFormValue('Status') == 'published') {
+            if ($this->SavedPage->Status == 'published') {
                $this->StatusMessage = T('Page published at') .' ' . Gdn_Format::Date();               
-            } elseif ($this->Form->GetFormValue('Status') == 'draft') {
+            } elseif ($this->SavedPage->Status == 'draft') {
                $this->StatusMessage = T('Page saved as draft at') .' '. Gdn_Format::Date(); 
             }
             
             /*
                TODO This does not work properly
             */
-            if (is_object($this->Page)) {
+            if (!$this->SavedPage->DateUpdated) { //Never been updated = new page
                $NewActivityID = $this->ActivityModel->Add(
                   Gdn::Session()->UserID,
-                  'EditPage',
+                  'NewPage',
                   '',
-                  $PageID,
                   '',
-                  $this->Page->UrlCode,
+                  '',
+                  $this->SavedPage->UrlCode,
                   FALSE);
+                  
+               $this->RedirectUrl = Url('edit/' . $PageID);  
+               unset($this->SavedPage);
             } else {
+               //die('cool');
                $NewActivityID = $this->ActivityModel->Add(
                   Gdn::Session()->UserID,
                   'EditPage',
                   '',
-                  $PageID,
                   '',
-                  $this->Form->GetFormValue('UrlCode'),
+                  '',
+                  $this->SavedPage->UrlCode,
                   FALSE);
-            }
-               
-            
-            
-            if (!$this->Form->GetFormValue('PageID')) { //If new page, redirect
-               $this->RedirectUrl = Url('edit/' . $PageID);   
-            }     
+            }      
          }
          $this->ErrorMessage($this->Form->Errors());
       }
