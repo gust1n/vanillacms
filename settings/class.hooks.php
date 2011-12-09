@@ -133,6 +133,7 @@ class VanillaCMSHooks implements Gdn_IPlugin {
    {
       if ($Sender->EventArguments['Row']->Format == 'page') {
          $Sender->EventArguments['Row']->Summary = substr(trim($Sender->EventArguments['Row']->Summary), 0,150); 
+         $Sender->EventArguments['Row']->Title = T('Page') . ': ' . $Sender->EventArguments['Row']->Title;
       }
    }
    

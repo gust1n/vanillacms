@@ -110,7 +110,7 @@ class PageModel extends Gdn_Model {
     */
    public function SaveTree($TreeArray) {
 
-      $PermTree = $this->SQL->Select('PageID, TreeLeft, TreeRight, Depth, Sort, ParentPageID, UrlCode')->From('Page')->Where('Status <>', 'deleted')->Get();
+      $PermTree = $this->SQL->Select('PageID, TreeLeft, TreeRight, Depth, Template, Sort, ParentPageID, UrlCode')->From('Page')->Where('Status <>', 'deleted')->Get();
       $PermTree = $PermTree->Index($PermTree->ResultArray(), 'PageID');
 
       usort($TreeArray, array('PageModel', '_TreeSort'));
@@ -135,10 +135,15 @@ class PageModel extends Gdn_Model {
             $PageUrlCodeExploded = explode('/', $PermTree[$PageID]['UrlCode']);
 	         $PageUrlCode = $PageUrlCodeExploded[count($PageUrlCodeExploded) - 1];
             
-            if ($Parent->PageID == -1) {
-               $UrlCode = $PageUrlCode;
+            if ($PermTree[$PageID]['Template'] == 'discussions' || $PermTree[$PageID]['Template'] == 'conversations') {
+               $UrlCode = $PermTree[$PageID]['UrlCode'];
             } else {
-               $UrlCode = $Parent->UrlCode . '/' . $PageUrlCode;
+            
+               if ($Parent->PageID == -1) {
+               $UrlCode = $PageUrlCode;
+               } else {
+                  $UrlCode = $Parent->UrlCode . '/' . $PageUrlCode;
+               }
             }
                                     
             $this->SQL->Update(
@@ -154,7 +159,10 @@ class PageModel extends Gdn_Model {
                array('PageID' => $PageID)
             )->Put();
             //And update page route
-            self::SetRoute($PageID);
+            if ($PermTree[$PageID]['Template'] != 'discussions' && $PermTree[$PageID]['Template'] != 'conversations') {
+               self::DeleteRoute($PageID);
+               self::SetRoute($PageID);
+            }
          }
       }
    }
