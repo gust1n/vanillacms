@@ -5,7 +5,7 @@
 */
 class EditController extends Gdn_Controller {
 
-   public $Uses = array('Database', 'Form', 'PageModel');
+   public $Uses = array('Database', 'Form', 'PageModel', 'ActivityModel');
    public function Initialize() {
       $this->Head = new HeadModule($this);
       $this->AddJsFile('jquery.js');
@@ -131,6 +131,7 @@ class EditController extends Gdn_Controller {
       else { //If saving
          $this->DeliveryType(DELIVERY_TYPE_BOOL);
          $this->Validation = new Gdn_Validation();
+         
          $FormValues = $this->Form->FormValues();
          $PageID = $this->PageModel->Save($FormValues);
 
@@ -178,10 +179,34 @@ class EditController extends Gdn_Controller {
                                    
             //Page Status (detect which button clicked)
             if ($this->Form->GetFormValue('Status') == 'published') {
-               $this->StatusMessage = T('Page published at') .' ' . Gdn_Format::Date(); 
+               $this->StatusMessage = T('Page published at') .' ' . Gdn_Format::Date();               
             } elseif ($this->Form->GetFormValue('Status') == 'draft') {
                $this->StatusMessage = T('Page saved as draft at') .' '. Gdn_Format::Date(); 
             }
+            
+            /*
+               TODO This does not work properly
+            */
+            if (is_object($this->Page)) {
+               $NewActivityID = $this->ActivityModel->Add(
+                  Gdn::Session()->UserID,
+                  'EditPage',
+                  '',
+                  $PageID,
+                  '',
+                  $this->Page->UrlCode,
+                  FALSE);
+            } else {
+               $NewActivityID = $this->ActivityModel->Add(
+                  Gdn::Session()->UserID,
+                  'EditPage',
+                  '',
+                  $PageID,
+                  '',
+                  $this->Form->GetFormValue('UrlCode'),
+                  FALSE);
+            }
+               
             
             
             if (!$this->Form->GetFormValue('PageID')) { //If new page, redirect

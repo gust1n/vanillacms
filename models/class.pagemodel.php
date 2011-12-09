@@ -291,8 +291,10 @@ class PageModel extends Gdn_Model {
                   
       // Define the primary key in this model's table.
       $this->DefineSchema();
-	
-      //$this->Validation->ApplyRule('Body', 'Required');
+      
+      /*
+         TODO Fix Field validation
+      */
                         
       // Validate $PageID and whether this is an insert
       $PageID = ArrayValue('PageID', $FormPostValues);

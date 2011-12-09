@@ -34,7 +34,6 @@ $Session = Gdn::Session();
       $LastRight = 0;
       $OpenCount = 0;
       $Loop = 0;
-      //die(print_r($this->AllPages->Result()));
       foreach ($this->AllPages->Result() as $Page) {
          if ($Page->PageID > 0) {
             // Only check stack if there is one
@@ -64,7 +63,6 @@ $Session = Gdn::Session();
             }
 
             echo "\n".'<li id="page_'.$Page->PageID.'">';
-            // DEBUG: echo Wrap($Page->Name.' [countright: '.$CountRight.' lastcount: '.$LastRight.' opencount: '.$OpenCount.']', 'div');
             $PageUrl = Url('/'.$Page->UrlCode, TRUE);
             $PageDate = $Page->DateUpdated > $Page->DateInserted ? $Page->DateUpdated : $Page->DateInserted;
             $Status = '';
@@ -82,7 +80,7 @@ $Session = Gdn::Session();
             $InMenu = $Page->InMenu != 0 ? ' InMenu' : 'NotInMenu';
             
             echo Wrap(
-               '<table class="'.($OpenCount > 0 ? 'Indented '.$Page->Status.'' : '').  $InMenu . '">
+               '<table class="'.($OpenCount > 0 ? 'Indented ' : ''). $Page->Status.' ' .  $InMenu . '">
                   <tr>
                      <td>
                         <strong>'.$Page->Name.'&nbsp;&nbsp;&nbsp;</strong>
