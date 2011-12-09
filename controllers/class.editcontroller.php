@@ -389,7 +389,7 @@ class EditController extends Gdn_Controller {
             //T(substr($Name,0,-6));
             
             $UpdateModel = new UpdateModel;
-            $InfoArray = $UpdateModel::ParseInfoArray($ModuleFile, 'ModuleInfo');
+            $InfoArray = UpdateModel::ParseInfoArray($ModuleFile, 'ModuleInfo');
             
             $AvailableModules[$ModuleName] = $InfoArray[$ModuleName];
             
