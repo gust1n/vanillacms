@@ -54,7 +54,7 @@ class PageModel extends Gdn_Model {
 	   $Defaults = array(
    		'OrderBy' => 'Sort', 'ParentPageID' => '',
    		'PageID' => '', 'Exclude' => '', 'IncludeDeleted' => false,
-   		'UrlCode' => ''
+   		'UrlCode' => '', 'Status' => 'all'
    	);
    	
    	$r = VanillaCMSController::ParseArgs($Args, $Defaults);	   	
@@ -84,6 +84,9 @@ class PageModel extends Gdn_Model {
 	      }
 	      if ($ParentPageID) {
 	        $this->SQL->Where('p.ParentPageID', $ParentPageID);
+	      }
+	      if ($Status != 'all') {
+	        $this->SQL->Where('p.Status', $Status);
 	      }
 	      $Exclude = explode(",", $Exclude);
 	      foreach ($Exclude as $ExcludeID) {
@@ -450,6 +453,10 @@ class PageModel extends Gdn_Model {
 	public function SetRoute($PageID)
 	{
 	   $Page = self::Get(array('PageID' =>$PageID));
+	   
+	   if ($Page->Template == 'discussions' || $Page->Template == 'conversations' || $Page->Status == 'draft') {
+	     return;
+	   }
 	   
 	   Gdn::Router()->SetRoute( //Set new route, see Gdn::Router for more info
          $Page->UrlCode,

@@ -1,5 +1,12 @@
 jQuery(document).ready(function($) {
    
+   $('a.StatusMessage').popup({
+      confirm: true,
+      followConfirm: false,
+      afterConfirm: function(json, sender) {
+         $(sender).parents('table').toggleClass('draft');       
+      }
+   });
    $('a.DeleteMessage').popup({
       confirm: true,
       followConfirm: false,

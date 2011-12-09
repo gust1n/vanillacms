@@ -47,23 +47,32 @@ class EditController extends Gdn_Controller {
 
       $this->Filter = $Filter;
       
-      $this->AllPages = $this->PageModel->Get();
+      $this->AllPages = $this->PageModel->Get(array('Status' => $this->Filter));
+      if ($this->Filter == 'deleted') {
+         $this->AllPages = $this->PageModel->Get(array('Status' => $this->Filter, 'IncludeDeleted' => true));
+      }
       
+      
+      $this->CountPages = $this->PageModel->Get(array('IncludeDeleted' => true));
       $PublishedCount = 0;
       $UnpublishedCount = 0;
+      $DeletedCount = 0;
                   
-      foreach ($this->AllPages->Result() as $Page) {
+      foreach ($this->CountPages->Result() as $Page) {
          if ($Page->PageID > 0) {
             if ($Page->Status == 'published') {
                $PublishedCount++;
-            } else {
+            } elseif ($Page->Status == 'draft') {
                $UnpublishedCount++;
+            } else {
+               $DeletedCount++;
             }
          } 
       }
       
       $this->PublishedCount = $PublishedCount;
       $this->UnpublishedCount = $UnpublishedCount;
+      $this->DeletedCount = $DeletedCount;
          
       $this->Render();
    }
@@ -155,7 +164,9 @@ class EditController extends Gdn_Controller {
             if (isset($this->Page->RouteIndex))
                $this->PageModel->DeleteRoute($PageID); //Always delete route in case UrlCode is changed
                
-            $this->PageModel->SetRoute($PageID); //Auto set route to get rid of /page prefix
+             $this->PageModel->SetRoute($PageID); //Auto set route to get rid of /page prefix
+
+            
             
             /*
             //PERMISSIONS
@@ -433,7 +444,7 @@ class EditController extends Gdn_Controller {
       if ($TransientKey !== FALSE && $Session->ValidateTransientKey($TransientKey)) {
          if ($Status == 'published' || $Status == 'draft' || $Status == 'deleted') {
 
-            if ($this->PageModel->Update('Status', $PageID, $Status) == true) {
+            if ($this->PageModel->Update('Status', $PageID, $Status)) {
                if ($Status == 'draft') {
                   $this->PageModel->DeleteRoute($PageID);
                   $this->StatusMessage = 'Page unpublished and saved as draft';

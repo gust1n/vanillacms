@@ -20,8 +20,9 @@ $Session = Gdn::Session();
 <div class="Tabs FilterTabs">
    <ul>
       <li<?php echo $this->Filter == 'all' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('All '.Wrap($this->UnpublishedCount + $this->PublishedCount)), 'edit/pages/all'); ?></li>
-      <li<?php echo $this->Filter == 'published' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('Enabled '.Wrap($this->PublishedCount)), 'edit/pages/published'); ?></li>
-      <li<?php echo $this->Filter == 'draft' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('Disabled '.Wrap($this->UnpublishedCount)), 'edit/pages/draft'); ?></li>
+      <li<?php echo $this->Filter == 'published' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('Published '.Wrap($this->PublishedCount)), 'edit/pages/published'); ?></li>
+      <li<?php echo $this->Filter == 'draft' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('Drafts '.Wrap($this->UnpublishedCount)), 'edit/pages/draft'); ?></li>
+      <li<?php echo $this->Filter == 'deleted' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('Deleted '.Wrap($this->DeletedCount)), 'edit/pages/deleted'); ?></li>
    </ul>
 </div>
 <?php echo $this->Form->Errors(); ?>
@@ -69,6 +70,11 @@ $Session = Gdn::Session();
             $Status = '';
             if ($Page->Status != 'published') {
                $Status = '(' . $Page->Status . ')';
+               $StatusChangerText = T('Publish');
+               $StatusChanger = 'published';
+            } else {
+               $StatusChangerText = T('Unpublish');
+               $StatusChanger = 'draft';
             }
             if ($Page->InMenu != 1) {
                $Status .= '(' . T('Not visible in menu') . ')';
@@ -79,7 +85,7 @@ $Session = Gdn::Session();
                '<table class="'.($OpenCount > 0 ? 'Indented '.$Page->Status.'' : '').  $InMenu . '">
                   <tr>
                      <td>
-                        <strong>'.$Page->Name.'&nbsp;&nbsp;&nbsp;' . $Status . '</strong>
+                        <strong>'.$Page->Name.'&nbsp;&nbsp;&nbsp;</strong>
                         '.Anchor($PageUrl, $PageUrl, array('target' => '_blank')).'
                      </td>
                         <td class="AuthorDate">
@@ -88,6 +94,7 @@ $Session = Gdn::Session();
                         </td>
                      <td class="Buttons">'
                         .Anchor(T('Edit'), '/edit/'.$Page->PageID, 'SmallButton EditButton')
+                        .Anchor( T($StatusChangerText), '/edit/status/'.$Page->PageID.'/'.$StatusChanger.'/'.$Session->TransientKey(), 'SmallButton StatusMessage')
                         .Anchor( T('Delete'), '/edit/status/'.$Page->PageID.'/deleted/'.$Session->TransientKey(), 'SmallButton DeleteMessage')
                      .'</td>
                   </tr>
