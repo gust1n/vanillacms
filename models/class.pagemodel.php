@@ -124,25 +124,29 @@ class PageModel extends Gdn_Model {
          if (in_array($ParentPageID, array('root', 'none')))
             $ParentPageID = -1;
             
-         
-         
          // Only update if the tree doesn't match the database.
          $Row = $PermTree[$PageID];
          if ($Node['left'] != $Row['TreeLeft'] || $Node['right'] != $Row['TreeRight'] || $Node['depth'] != $Row['Depth'] || $ParentPageID != $Row['ParentPageID'] || $Node['left'] != $Row['Sort'] || $PermCatChanged) {
             
             $Parent = self::Get(array('PageID' => $ParentPageID));
+            $ParentUrlCodeExploded = explode('/', $Parent->UrlCode);
             
             $PageUrlCodeExploded = explode('/', $PermTree[$PageID]['UrlCode']);
 	         $PageUrlCode = $PageUrlCodeExploded[count($PageUrlCodeExploded) - 1];
-            
-            if ($PermTree[$PageID]['Template'] == 'discussions' || $PermTree[$PageID]['Template'] == 'conversations') {
-               $UrlCode = $PermTree[$PageID]['UrlCode'];
-            } else {
-            
+            $SetRoute = true;
+            //Prevent from saving over when page is set to a reserved UrlCode
+      	   if (array_key_exists($PageUrlCodeExploded[0], C('VanillaCMS.ReservedUrlCodes'))) {
+      	     $UrlCode = $PermTree[$PageID]['UrlCode'];
+      	     $SetRoute = false;
+      	   } else {
                if ($Parent->PageID == -1) {
                $UrlCode = $PageUrlCode;
                } else {
-                  $UrlCode = $Parent->UrlCode . '/' . $PageUrlCode;
+                  if (array_key_exists($ParentUrlCodeExploded[0], C('VanillaCMS.ReservedUrlCodes'))) {
+                     $UrlCode = $PageUrlCode;
+                  } else {
+                     $UrlCode = $Parent->UrlCode . '/' . $PageUrlCode;
+                  } 
                }
             }
                                     
@@ -159,7 +163,7 @@ class PageModel extends Gdn_Model {
                array('PageID' => $PageID)
             )->Put();
             //And update page route
-            if ($PermTree[$PageID]['Template'] != 'discussions' && $PermTree[$PageID]['Template'] != 'conversations') {
+            if ($SetRoute) {
                self::DeleteRoute($PageID);
                self::SetRoute($PageID);
             }
@@ -462,7 +466,13 @@ class PageModel extends Gdn_Model {
 	{
 	   $Page = self::Get(array('PageID' =>$PageID));
 	   
-	   if ($Page->Template == 'discussions' || $Page->Template == 'conversations' || $Page->Status == 'draft') {
+	   //Check for reserved UrlCodes
+	   $UrlCodeExploded = explode('/', $Page->UrlCode); //First get the first part, so we're not saving over a reserved sub-url
+	   if (array_key_exists($UrlCodeExploded[0], C('VanillaCMS.ReservedUrlCodes'))) {
+	     return;
+	   }
+	   //Dont set route for drafts
+	   if ($Page->Status == 'draft') {
 	     return;
 	   }
 	   

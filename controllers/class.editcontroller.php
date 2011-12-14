@@ -230,12 +230,7 @@ class EditController extends Gdn_Controller {
       
       //Render array with possible templates
       $this->TemplateOptions = $this->_AvailableTemplates();
-      if (!isset($this->TemplateOptions)) {
-         $this->TemplateOptions = array(
-            '' => T('No templates available')
-         );
-          
-      }
+      $this->CoreTemplates = C('VanillaCMS.CoreTemplates');
       
       //Get default permissions
       $PermissionModel = Gdn::PermissionModel();
@@ -344,9 +339,6 @@ class EditController extends Gdn_Controller {
             closedir($FolderHandle);
             
          }
-         //Add the default templates for total menu-control
-         $AvailableTemplates['discussions'] = T('All Discussions');
-         $AvailableTemplates['conversations'] = T('Conversations');
 
          return $AvailableTemplates;
    }

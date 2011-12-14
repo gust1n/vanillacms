@@ -5,3 +5,26 @@
 $Configuration['VanillaCMS']['Installed'] = '0';
 
 $Configuration['VanillaCMS']['Copyright'] = '© '.date('Y').' Vanilla CMS by <a href="http://jockegustin.se">Jocke Gustin</a>';
+//Prevent application from saving over routes to vanilla core-applications
+$Configuration['VanillaCMS']['ReservedUrlCodes'] = array(
+                                                   'discussions' => 'All discussions',
+                                                   'discussion' => 'Single Discusson',
+                                                   'categories' => 'Forum Categories',
+                                                   'activity' => 'Recent Activity',
+                                                   'messages' => 'Conversations application',
+                                                   'profile' => 'Profile Page',
+                                                   'search' => 'Search',
+                                                   'dashboard' => 'Dashboard',
+                                                   'entry' => 'Sign in/out'
+                                                   );
+//Core functions that are allowed to create menu-items
+$Configuration['VanillaCMS']['CoreTemplates'] = array(
+                                                   'discussions' => 'All discussions',
+                                                   'categories/all' => 'Forum Categories',
+                                                   'activity' => 'Recent Activity',
+                                                   'messages/all' => 'Inbox',
+                                                   'profile' => 'Profile',
+                                                   'search' => 'Search',
+                                                   'dashboard/settings' => 'Dashboard',
+                                                   //'entry' => 'Sign in/out'
+                                                   );                              

@@ -19,8 +19,11 @@ if (is_object($this->Page)) {
    $HeaderText = T('Add '. $this->Type);
    //echo "<script type='text/javascript'>jQuery(document).ready(function($) { $('#Form_Permission').attr('checked', true); });</script>";
 }
-if ($this->Page->Template == 'discussions' || $this->Page->Template == 'conversations') {
+if (array_key_exists($this->Page->Template, C('VanillaCMS.CoreTemplates'))) {
    echo '<style type="text/css">.ParentNotOptional{display:none}</style>';
+   echo '<input type="hidden" id="IsCoreTemplate" value="true" />';
+} else {
+   echo '<input type="hidden" id="IsCoreTemplate" value="false" />';
 }
 ?>
 <h1 id="MainHeader"><?php echo $HeaderText; ?></h1>
@@ -250,13 +253,32 @@ $ToPanel .= '<li>';
 
 //$ToPanel .= $this->Form->Label('Associate Discussion', 'DiscussionID') . $this->Form->Dropdown('DiscussionID', $this->DiscussionsOptions, array('default' => '0'));
 
-$ToPanel .= $this->Form->Label('Template', 'Template') . $this->Form->Dropdown('Template', $this->TemplateOptions, array('default' => 'default')) . '</li>';
+$ToPanel .= $this->Form->Label('Template', 'Template');
+$ToPanel .= '<select id="Form_Template" name="Page/Template">';
+$ToPanel .= '<optgroup label="'.T('Theme Templates').'">';
+$Selected = '';
+foreach ($this->TemplateOptions as $UrlCode => $Name) {
+   if ($this->Page->UrlCode == $UrlCode) {
+      $Selected = 'selected="selected"';
+   }
+   $ToPanel .= '<option value="'.$UrlCode.'" '.$Selected.'>' . $Name . '</option>';
+   $Selected = '';
+}
+$ToPanel .= '</optgroup><optgroup label="'.T('Core Templates').'">';
+foreach ($this->CoreTemplates as $UrlCode => $Name) {
+   if ($this->Page->UrlCode == $UrlCode) {
+      $Selected = 'selected="selected"';
+   }
+   $ToPanel .= '<option value="'.$UrlCode.'" '.$Selected.' class="CoreTemplate">' . $Name . '</option>';
+   $Selected = '';
+}
+$ToPanel .= '</optgroup></select></li>';
 
 //$ToPanel .= $this->Form->Label(T('Youtube video #ID'), 'YoutubeID') . $this->Form->TextBox('YoutubeID');
 
 //$ToPanel .=  $this->Form->Label('Custom Css', 'CustomCss') . $this->Form->TextBox('CustomCss', array('class' => 'InputBox CustomCss'));
 
-$ToPanel .= '</li></ul></div>';
+$ToPanel .= '</ul></div>';
 
 /*
 if(count($this->PermissionData) > 0) {
