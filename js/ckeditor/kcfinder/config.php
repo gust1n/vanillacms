@@ -4,9 +4,9 @@
   *
   *      @desc Base configuration file
   *   @package KCFinder
-  *   @version 2.21
+  *   @version 2.51
   *    @author Pavel Tzonkov <pavelc@users.sourceforge.net>
-  * @copyright 2010 KCFinder Project
+  * @copyright 2010, 2011 KCFinder Project
   *   @license http://www.opensource.org/licenses/gpl-2.0.php GPLv2
   *   @license http://www.opensource.org/licenses/lgpl-2.1.php LGPLv2
   *      @link http://kcfinder.sunhater.com
@@ -15,23 +15,46 @@
 // IMPORTANT!!! Do not remove uncommented settings in this file even if
 // you are using session configuration.
 // See http://kcfinder.sunhater.com/install for setting descriptions
-//echo $_SESSION['KCFINDER']['disabled'];
-//print_r($_SESSION);
+
+define('PATH_ROOT', dirname(__FILE__).'/../../../../..');
+$PathUrl = $_SERVER['REQUEST_URI'];
+$PathUrlExploded = explode('/', $PathUrl);
+if ($PathUrlExploded[1] != 'applications') {
+   $PathUrl = '/' . $PathUrlExploded[1];
+}
 $_CONFIG = array(
 
-    //'disabled' => true,
-    'readonly' => false,
-    'denyZipDownload' => true,
+    'disabled' => true,
+    'denyZipDownload' => false,
+    'denyUpdateCheck' => false,
+    'denyExtensionRename' => false,
 
     'theme' => "oxygen",
 
-    'uploadURL' => "../../../../../uploads",
-    'uploadDir' => "",
+    'uploadURL' => $PathUrl."/uploads",
+    'uploadDir' => PATH_ROOT.'/uploads',
 
     'dirPerms' => 0755,
     'filePerms' => 0644,
 
-    'deniedExts' => "exe com msi bat php cgi pl",
+    'access' => array(
+
+        'files' => array(
+            'upload' => true,
+            'delete' => true,
+            'copy' => true,
+            'move' => true,
+            'rename' => true
+        ),
+
+        'dirs' => array(
+            'create' => true,
+            'delete' => true,
+            'rename' => true
+        )
+    ),
+
+    'deniedExts' => "exe com msi bat php phps phtml php3 php4 cgi pl",
 
     'types' => array(
 
@@ -45,6 +68,16 @@ $_CONFIG = array(
         'media'   =>  "swf flv avi mpg mpeg qt mov wmv asf rm",
         'image'   =>  "*img",
     ),
+
+    'filenameChangeChars' => array(/*
+        ' ' => "_",
+        ':' => "."
+    */),
+
+    'dirnameChangeChars' => array(/*
+        ' ' => "_",
+        ':' => "."
+    */),
 
     'mime_magic' => "",
 
@@ -63,8 +96,7 @@ $_CONFIG = array(
     'cookiePrefix' => 'KCFINDER_',
 
     // THE FOLLOWING SETTINGS CANNOT BE OVERRIDED WITH SESSION CONFIGURATION
-
-    '_check4htaccess' => true,
+    '_check4htaccess' => false,
     //'_tinyMCEPath' => "/tiny_mce",
 
     '_sessionVar' => &$_SESSION['KCFINDER'],

@@ -41,9 +41,8 @@
          $UserOptions = '';
          if ($Session->CheckPermission('Garden.Settings.Manage')) {
             $_SESSION['KCFINDER'] = array();
-            $_SESSION['KCFINDER_disabled'] = false;
-            //$_SESSION['KCFINDER']['uploadURL'] = "/users/" . $user['username'] . "/upload";
-            //$_SESSION['KCFINDER']['uploadDir'] = ""; //If admin, set cookie for editor filebrowser
+            $_SESSION['KCFINDER']['disabled'] = false; //If admin, set cookie for editor filebrowser
+            
 				$UserOptions .= '<li class="Dashboard">' .Anchor('<span class="imgWrap"><i class="Img Sprite Small Dashboard"></i></span><span class="linkWrap">' . T('Dashboard') . '</span>', '/settings', 'Dashboard') . '</li>';
 			}
 			if ($Session->CheckPermission('VanillaCMS.Internal.View')) {

@@ -1,11 +1,10 @@
 ﻿/*
-Copyright (c) 2003-2010, CKSource - Frederico Knabben. All rights reserved.
+Copyright (c) 2003-2011, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 
 CKEDITOR.editorConfig = function( config )
 {
-	// Define changes to default configuration here. For example:
 	config.language = 'en';
 	config.uiColor = '#ddd';
 	//config.contentsCss = gdn.definition('WebRoot') + '/themes/default/design/style.css';
@@ -29,5 +28,4 @@ CKEDITOR.editorConfig = function( config )
        ['TextColor','BGColor'],
        ['Maximize', 'ShowBlocks',]
    ];
-   //config.extraPlugins = 'tokens';
 };

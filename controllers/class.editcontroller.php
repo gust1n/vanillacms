@@ -7,6 +7,7 @@ class EditController extends Gdn_Controller {
 
    public $Uses = array('Database', 'Form', 'PageModel', 'ActivityModel');
    public function Initialize() {
+      
       $this->Head = new HeadModule($this);
       $this->AddJsFile('jquery.js');
       $this->AddJsFile('jquery.livequery.js');

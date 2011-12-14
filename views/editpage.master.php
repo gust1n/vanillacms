@@ -3,6 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-ca">
 <head>
    <?php $this->RenderAsset('Head'); ?>
+   <?php 
+   $Session = Gdn::Session();
+   if ($Session->CheckPermission('VanillaCMS.Pages.Manage')) {
+      session_start();
+      $_SESSION['KCFINDER'] = array();
+      $_SESSION['KCFINDER']['disabled'] = false; //If admin, set cookie for editor filebrowser
+   }
+   ?>
 </head>
 <body id="<?php echo $BodyIdentifier; ?>" class="<?php echo $this->CssClass; ?>">
    <div id="Frame">
@@ -10,7 +18,7 @@
          <h1><?php echo Anchor(C('Garden.Title').' '.Wrap(T('Visit Site')), '/'); ?></h1>
          <div class="User">
             <?php
-         $Session = Gdn::Session();
+         
          $Authenticator = Gdn::Authenticator();
          if ($Session->IsValid()) {
             $this->FireEvent('BeforeUserOptionsMenu');
