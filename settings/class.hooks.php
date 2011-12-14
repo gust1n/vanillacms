@@ -115,6 +115,7 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $Explicit = TRUE;
       $Validation = new Gdn_Validation(); // This is going to be needed by structure.php to validate permission names
       include(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'settings' . DS . 'structure.php');
+      include(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'models' . DS . 'class.pagemodel.php');
       $ApplicationInfo = array();
       include(CombinePaths(array(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'settings' . DS . 'about.php')));
       $Version = ArrayValue('Version', ArrayValue('VanillaCMS', $ApplicationInfo, array()), 'Undefined');
