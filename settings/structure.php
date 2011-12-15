@@ -63,6 +63,9 @@ $Construct->Table('PageMeta')
 	->Column('MetaValue', 'text', NULL)
 	->Column('MetaAsset', 'varchar(255)', NULL)
 	->Column('MetaAssetName', 'varchar(255)', NULL)
+	->Column('GetData', 'tinyint(1)', '0')
+	->Column('ApplicationFolder', 'varchar(255)', 'vanillacms')
+	->Column('ConfigSetting', 'varchar(255)', NULL)
 	->Engine('MyISAM')
 	->Set($Explicit, $Drop);
 	

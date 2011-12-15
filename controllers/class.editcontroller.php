@@ -142,6 +142,9 @@ class EditController extends Gdn_Controller {
             
             $this->SavedPage = $this->PageModel->Get(array('PageID' => $PageID));
             
+            /*
+               TODO Fix ajax-updating when editing instead of this crappy solution
+            */
             //PAGEMETA
             $this->PageModel->ClearPageMeta($PageID);
             if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
@@ -222,7 +225,9 @@ class EditController extends Gdn_Controller {
       $this->AvailableMetaKeys = $this->_AvailableMetaKeys();
       
       //Render array with available modules
-      $this->AvailableModules = $this->_AvailableModules();
+      $this->VanillaCMSModules = $this->_AvailableModules();
+      $this->DashboardModules = C('VanillaCMS.DashboardModules');
+      $this->VanillaModules = C('VanillaCMS.VanillaModules');
 
       
       //Render array with available assets

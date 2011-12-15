@@ -27,4 +27,42 @@ $Configuration['VanillaCMS']['CoreTemplates'] = array(
                                                    'search' => 'Search',
                                                    'dashboard/settings' => 'Dashboard',
                                                    //'entry' => 'Sign in/out'
-                                                   );                              
+                                                   );   
+//Core modules to add to modules list
+$Configuration['VanillaCMS']['DashboardModules'] = array(
+                                                      'GuestModule' => array(
+                                                                           'Name' => 'Guest Module',
+                                                                           'ApplicationFolder' => 'dashboard',
+                                                                           'ConfigSetting' => 'Garden.Modules.ShowGuestModule'
+                                                      ),
+                                                      'RecentActivityModule' => array(
+                                                                           'Name' => 'Recent Activity',
+                                                                           'ApplicationFolder' => 'dashboard',
+                                                                           'GetData' => 1
+                                                      ),
+                                                      'RecentUserModule' => array(
+                                                                           'Name' => 'Recent Users',
+                                                                           'ApplicationFolder' => 'dashboard',
+                                                                           'ConfigSetting' => 'Garden.Modules.ShowRecentUserModule'
+                                                      )
+                                                   );
+$Configuration['VanillaCMS']['VanillaModules'] = array(
+                                                   'CategoriesModule' => array(
+                                                                        'Name' => 'Forum Categories',
+                                                                        'ApplicationFolder' => 'vanilla'
+                                                   ),
+                                                   'BookmarkedModule' => array(
+                                                                        'Name' => 'Forum Bookmarks',
+                                                                        'ApplicationFolder' => 'vanilla',
+                                                                        'ConfigSetting' => 'Vanilla.Modules.ShowBookmarkedModule'
+                                                   ),
+                                                   'NewDiscussionModule' => array(
+                                                                        'Name' => 'New discussion button',
+                                                                        'ApplicationFolder' => 'vanilla'
+                                                   ),
+                                                   'DiscussionsModule' => array(
+                                                                        'Name' => 'Forum Discussions',
+                                                                        'ApplicationFolder' => 'vanilla',
+                                                                        'GetData' => 1
+                                                   )
+                                                   );                           

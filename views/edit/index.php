@@ -1,15 +1,11 @@
 <?php if (!defined('APPLICATION')) exit(); 
 $Session = Gdn::Session();
 
-foreach ($this->AvailableModules as $key => $Module) {
+foreach ($this->VanillaCMSModules as $key => $Module) {
    echo '<input type="hidden" id="'.$key.'_ShowAssets" value="' . $Module['ShowAssets'] . '" />';
    echo '<input type="hidden" id="'.$key.'_HelpText" value="' . $Module['HelpText'] . '" />';
    echo '<input type="hidden" id="'.$key.'_ContentType" value="' . $Module['ContentType'] . '" />';
 }
-foreach ($this->AvailableModules as $key => $value) {
-   //echo $key;
-}
-
 
 setcookie("admin", "1", time()+3600, '/');
 if (is_object($this->Page)) {
@@ -128,11 +124,20 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
                         echo '<option value="'.$Key.'">'.$Value.'</option>';                        
                      } ?>
                   </optgroup>
-                  <optgroup label="<?php echo T('Modules'); ?>"><?php   
-                     foreach ($this->AvailableModules as $key => $Module) {
+                  <optgroup label="<?php echo T('CMS Modules'); ?>"><?php   
+                     foreach ($this->VanillaCMSModules as $key => $Module) {
                         echo '<option class="ShowAsset" value="'.$key.'">'.$Module['Name'].'</option>';
-                     } ?>
-                     
+                     } ?>  
+                  </optgroup>
+                  <optgroup label="<?php echo T('Dashboard Modules'); ?>"><?php   
+                     foreach ($this->DashboardModules as $key => $Module) {
+                        echo '<option class="ShowAsset" value="'.$key.'">'.$Module['Name'].'</option>';
+                     } ?>  
+                  </optgroup>
+                  <optgroup label="<?php echo T('Vanilla Modules'); ?>"><?php   
+                     foreach ($this->VanillaModules as $key => $Module) {
+                        echo '<option class="ShowAsset" value="'.$key.'">'.$Module['Name'].'</option>';
+                     } ?>  
                   </optgroup>
                </select>
                <select class="AssetShowHide" id="MetaAssetSelect"><?php

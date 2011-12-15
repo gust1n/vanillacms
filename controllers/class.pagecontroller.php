@@ -51,35 +51,47 @@ class PageController extends VanillaCMSController {
          $this->AddSideMenu($this->Page->UrlCode);
 
          $this->Page->PageMeta = $this->PageModel->GetPageMeta($this->Page->PageID);
-         
          foreach ($this->Page->PageMeta->Result() as $PageMeta) {
             
-            if($PageMeta->MetaAsset) {
+            if($PageMeta->MetaAsset) { //if is to be added to an asset
+               if ($PageMeta->ApplicationFolder) {
+                  //Temporarily set to different applicaiton folder for rendering external modules
+                  $this->ApplicationFolder = $Module->ApplicationFolder; 
+               }
 
-               /*
-               if ($PageMeta->MetaKey == 'CustomHtmlModule') {    
-               $CustomHtmlModule = new CustomHtmlModule($this, $PageMeta->MetaValue);
-               $this->AddAsset($PageMeta->MetaAsset, $CustomHtmlModule);
-               }*/
-
-               $Temp = new $PageMeta->MetaKey($this, $PageMeta->MetaValue);
-               $this->AddAsset($PageMeta->MetaAsset, $Temp);
-               unset($Temp);
+               //Temporarily set config, due to how the external modeules load we have to make this #€%*&# ugly (but working) solution
+               if ($PageMeta->ConfigSetting) {
+                  SaveToConfig('VanillaCMS.TempModule.' . $PageMeta->ConfigSetting, C($PageMeta->ConfigSetting)); //Save prev state for restoring after render
+                  SaveToConfig($PageMeta->ConfigSetting, TRUE); 
+               }
+               
+               if ($PageMeta->ApplicationFolder == 'vanillacms') {
+                  $Module = new $PageMeta->MetaKey($this, $PageMeta->MetaValue);
+               } else {
+                  $Module = new $PageMeta->MetaKey($this);
+                  if ($PageMeta->GetData == 1) {
+                     $Module->GetData($PageMeta->MetaValue);
+                  }  
+               }
+               $this->AddAsset($PageMeta->MetaAsset, $Module);
+               unset($Module);
+                              
             }
-
+            //or else we have these special ones
             if ($PageMeta->MetaKey == 'MetaDescription') {
                $this->Head->AddTag('meta', array('name' => 'description', 'content'=>$PageMeta->MetaValue));
             }
-
             if ($PageMeta->MetaKey == 'MetaKeywords') {
                $this->Head->AddTag('meta', array('name' => 'keywords', 'content'=>$PageMeta->MetaValue));
             }
-
             if ($PageMeta->MetaKey == 'CustomCss') {
                $this->CustomCss = $PageMeta->MetaValue;
             }
+            
 
          }
+         
+         $this->ApplicationFolder = 'vanillacms'; //Restore to default location for proper rendering
          
          if (isset($this->Page->Share) && $this->Page->Share == 1) {
             $ShareModule = new ShareModule($this);

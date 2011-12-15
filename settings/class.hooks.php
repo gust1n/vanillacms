@@ -43,7 +43,32 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $Sender->Menu->RemoveGroup('Conversations');
       $Sender->Menu->RemoveLinks('Discussions');
    }
-     
+      
+   public function Base_Render_After(&$Sender) {
+      //We must reset the previous setting after my ugly (and perfect) fix
+      
+      foreach (C('VanillaCMS.TempModule') as $Value => $i) {
+         $Setting = '';
+         $Setting .= $Value . '.';         
+         
+         foreach ($i as $Value => $i) {
+            $Setting .= $Value . '.'; 
+            
+            foreach ($i as $Value => $i) {
+               $Setting .= $Value;
+            }
+         }       
+         if (C('VanillaCMS.TempModule.' . $Setting)) {
+            SaveToConfig($Setting, C('VanillaCMS.TempModule.' . $Setting));
+         } else {
+            SaveToConfig($Setting, FALSE);
+         }
+         RemoveFromConfig('VanillaCMS.TempModule.' . $Setting, '');
+      }
+      
+      
+   }
+        
    public function ProfileController_Render_Before($Sender) {
       $Sender->AddCSSFile('plugins/Voting/design/voting.css');
       $Sender->AddJSFile('plugins/Voting/voting.js');
@@ -126,10 +151,6 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       SaveToConfig($Save);
    }
 
-   public function SidaController_AfterCommentMeta_Handler(&$Sender) {
-      echo $Sender->RenderAsset('AfterCommentMeta');
-   }
-
    public function SearchController_BeforeItemContent_Handler($Sender)
    {
       if ($Sender->EventArguments['Row']->Format == 'page') {
@@ -142,9 +163,6 @@ class VanillaCMSHooks implements Gdn_IPlugin {
         $PageModel = new PageModel();
         $PageModel->Search($Sender);
      }
-  
-
-   
 
    public function Base_GetAppSettingsMenuItems_Handler(&$Sender) {
 
