@@ -239,7 +239,7 @@ class EditController extends Gdn_Controller {
 	   //print_r($Permissions);
       //return;
       $this->SetData('PermissionData', $Permissions, TRUE);
-
+      $this->MessagesLoaded = 1; //Trick dashboard hook that messages already been loaded since it only checks for the admin masterview
       $this->Render();
    }
    
