@@ -17,9 +17,7 @@ class EditController extends Gdn_Controller {
       $this->AddJsFile('global.js');
       $this->AddJsFile('settings.js');
 
-
-         $this->AddCssFile('admin.css');
-      
+      $this->AddCssFile('admin.css');
 
       $this->MasterView = 'admin';
       parent::Initialize();
@@ -217,9 +215,10 @@ class EditController extends Gdn_Controller {
          }
          $this->ErrorMessage($this->Form->Errors());
       }
+      
+      /*END OF AuthenticatedPostBack function*/
             
-      //$this->PageModel->RebuildTree();
-      $this->AvailableParents = $this->PageModel->Get(array('Exclude' => $this->Page->PageID));      
+      $this->AvailableParents = $this->PageModel->Get(array('Exclude' => $this->Page->PageID)); //Exclude own page   
       
       //Render array with available meta keys
       $this->AvailableMetaKeys = $this->_AvailableMetaKeys();
@@ -246,47 +245,6 @@ class EditController extends Gdn_Controller {
       $this->SetData('PermissionData', $Permissions, TRUE);
       $this->MessagesLoaded = 1; //Trick dashboard hook that messages already been loaded since it only checks for the admin masterview
       $this->Render();
-   }
-   
-   function DropdownPages($args = '', $ShowEmpty = TRUE, $EmptyText = '', $echo = null) {
-
-   	$PagesQuery = $this->PageModel->Get();
-      $Pages = $PagesQuery->Result(DATASET_TYPE_ARRAY);
-      
-      die(print_r($Pages));
-      
-      $Pages = VanillaCMSController::PageTree($Pages);
-      
-      if ( ! empty($Pages) ) {
-   		$output = "<select name=\"$name\" id=\"$id\">\n";
-   		if ($ShowEmpty) {
-   		   $output .= "\t<option value=\"-1\">$EmptyText</option>";
-   		}
-
-   		//$output .= walk_page_dropdown_tree($pages, $depth, $r);
-   		$output .= "</select>\n";
-   	}
-   	
-   	echo '<pre>';
-   	print_r($Pages);
-   	echo '</pre>';
-   	//$pages = $this->PageModel->GetPagesJG();
-   	//$output = '';
-
-   	//if ( ! empty($pages) ) {
-   	//	$output = "<select name=\"$name\" id=\"$id\">\n";
-   	//	if ( $show_option_no_change )
-   	//		$output .= "\t<option value=\"-1\">$show_option_no_change</option>";
-   	//	if ( $show_option_none )
-   	//		$output .= "\t<option value=\"" . esc_attr($option_none_value) . "\">$show_option_none</option>\n";
-   	//	$output .= walk_page_dropdown_tree($pages, $depth, $r);
-   	//	$output .= "</select>\n";
-   	//}
-
-   	if ( $echo )
-   		echo $output;
-
-   	return $output;
    }
    
    private function _ValidateUniqueUrlCode($UrlCode) {
