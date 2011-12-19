@@ -412,6 +412,10 @@ class PageModel extends Gdn_Model {
 	{
 	   $Page = self::Get(array('PageID' =>$PageID));
 	   
+	   if (!is_object($Page)) {
+	     return;
+	   }
+	   
 	   //Check for reserved UrlCodes
 	   $UrlCodeExploded = explode('/', $Page->UrlCode); //First get the first part, so we're not saving over a reserved sub-url
 	   if (array_key_exists($UrlCodeExploded[0], C('VanillaCMS.ReservedUrlCodes'))) {
