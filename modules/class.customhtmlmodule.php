@@ -4,7 +4,7 @@ $ModuleInfo['CustomHtmlModule'] = array(
 	'Name' => 'Custom Html',
    'Description' => "Enables you to insert custom html",
    'HelpText' => "Insert custom HTML here",
-   'ShowAssets' => false,
+   'ShowAssets' => true,
    'ContentType' => "textarea",
    'Author' => "Jocke Gustin"
 );

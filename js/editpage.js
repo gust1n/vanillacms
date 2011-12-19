@@ -1,21 +1,40 @@
 jQuery(document).ready(function($) {
+   var modulesInfo = '';   //Global json array with info of all modules
+
+   if ($('#Form_PageID').length == 0) {
+      $('.PostMeta').hide();
+   };
+
 
    //PageMeta
    $('#MetaKeySelect').change(function() {  //Show/Hide Assets
-      var id = $('#MetaKeySelect option:selected').val();
       
-      if ($('#' + id + '_ShowAssets').val() == 'true') {
+      if (modulesInfo.length == 0) { //Only fetch first time
+          $.ajax({
+              url: gdn.definition('WebRoot') + '/edit/availablemodules/json',
+              async: false,
+              dataType: 'json',
+              success: function(json) {
+                 json = $.postParseJson(json);
+                 modulesInfo = json.Modules;
+              }
+          });   
+      };
+      
+      var MetaKey = $('#MetaKeySelect option:selected').val();
+            
+      if (modulesInfo[MetaKey].ShowAssets == "true" || modulesInfo[MetaKey].ShowAssets == true) {
          $('.AssetShowHide').show();
       } else {
          $('.AssetShowHide').hide();
       };
-      if ($('#' + id + '_ContentType').val() == 'none') {
+      if (modulesInfo[MetaKey].ContentType == "none") {
          $('#MetaValueLabel').hide();
          $('#MetaValue').hide();
-      } else if($('#' + id + '_ContentType').val() == 'text') {
+      } else if (modulesInfo[MetaKey].ContentType == "text") {
          $('#MetaValueLabel').show();
          $('#MetaValue').replaceWith('<input class="text" type="text" id="MetaValue" name="MetaValue" />');
-      }  else if($('#' + id + '_ContentType').val() == 'textarea') {
+      } else if (modulesInfo[MetaKey].ContentType == "textarea") {
          $('#MetaValueLabel').show();
          $('#MetaValue').replaceWith('<textarea id="MetaValue" style="width: 99%; overflow-x: hidden; overflow-y: hidden; display: block; " name="MetaValue" rows="4" cols="25" tabindex="8"></textarea>');
       } else {
@@ -23,7 +42,7 @@ jQuery(document).ready(function($) {
           $('#MetaValue').show();
       };
       
-      $('#MetaValueLabel').html($('#' + id + '_HelpText').val());
+      $('#MetaValueLabel').html(modulesInfo[MetaKey].HelpText);
 
    });
    
@@ -33,24 +52,56 @@ jQuery(document).ready(function($) {
 
    $('a#NewMetaSubmit').live('click', function() {//Submit new PageMeta
       $('#MetaAjaxResponse').empty();
-      var key = $('#MetaKeySelect option:selected').val();
-      var keyname = $('#MetaKeySelect option:selected').html();
-      var asset = '';
-      var assetname = '';
+      var postValues;
+      var MetaKey = $('#MetaKeySelect option:selected').val();
+      var MetaKeyName = $('#MetaKeySelect option:selected').html();
+      var PageID = $('#Form_PageID').val();
+      var MetaAsset = '';
+      var MetaAssetName = '';
       if ($('#MetaKeySelect option:selected').hasClass('ShowAsset')) {
-         asset = $('#MetaAssetSelect option:selected').val();
-         assetname = $('#MetaAssetSelect option:selected').html();
+         MetaAsset = $('#MetaAssetSelect option:selected').val();
+         MetaAssetName = $('#MetaAssetSelect option:selected').html();
       }
-      var value = $('#MetaValue').val().trim();
-
-      if (key == '' || keyname == '') {
-         $('<p class="Alert"></p>').html("Du måste ange ett värde").appendTo('#MetaAjaxResponse');
-      }
-      else {
-         $('<tr><td>'+keyname+'<a href="deletemeta" class="DeleteMeta">[Ta bort]</a><input type="hidden" id="Form_MetaKey[ ]" name="Page/MetaKey[ ]" value="'+key+'|'+keyname+'|'+value+'|'+asset+'|'+assetname+'" /></td><td>'+assetname+'</td><td>'+value+'</td></tr>').appendTo('#TheList');
-         $('#MetaList').show();
-         $('#MetaList').effect("highlight", {}, 1000);
-      }  
+      var MetaValue = $('#MetaValue').val().trim();
+      
+      postValues = 'MetaKey=' + MetaKey + '&MetaKeyName=' + MetaKeyName + '&PageID=' + PageID + '&MetaAsset=' + MetaAsset + '&MetaAssetName=' + MetaAssetName + '&MetaValue=' + MetaValue;
+      postValues += '&TransientKey=' + gdn.definition('TransientKey') + '&hpt=';
+      
+      $.ajax({
+         type: "POST",
+         url: gdn.definition('WebRoot') + '/edit/addpagemeta/',
+         data: postValues,
+         dataType: 'json',
+         error: function(XMLHttpRequest, textStatus, errorThrown) {
+            $('div.Popup').remove();
+            $.popup({}, XMLHttpRequest.responseText);
+         },
+         success: function(json) {
+            json = $.postParseJson(json);
+                         
+            if (json.FormSaved == false) {
+               $(frm).prepend(json.ErrorMessages);
+               json.ErrorMessages = null;
+            } else {
+               $('#MetaValue').empty();
+               $('#MetaValue').val('');
+               GetPageMeta(); //Fetch new PageMeta
+               $('#MetaList').effect("highlight", {}, 2700);
+               gdn.inform(json);
+            }
+                           
+            if (json.RedirectUrl)
+              setTimeout("document.location='" + json.RedirectUrl + "';", 300);
+         },
+         complete: function(XMLHttpRequest, textStatus) {
+            // Remove any spinners, and re-enable buttons.
+            $('span.TinyProgress').remove();
+         }
+      });
+      
+         //$('<tr><td>'+keyname+'<a href="deletemeta" class="DeleteMeta">[Ta bort]</a><input type="hidden" id="Form_MetaKey[ ]" name="Page/MetaKey[ ]" value="'+key+'|'+keyname+'|'+value+'|'+asset+'|'+assetname+'" /></td><td>'+assetname+'</td><td>'+value+'</td></tr>').appendTo('#TheList');
+         //$('#MetaList').show();
+         //$('#MetaList').effect("highlight", {}, 1000);
    });
 
    $('a.EditMeta').live('click', function() {
@@ -73,11 +124,49 @@ jQuery(document).ready(function($) {
       confirm: true,
       followConfirm: false,
       afterConfirm: function(json, sender) {
-         $(sender).parents('tr').remove();
+         var PageMetaID = $(sender).parents('tr').attr('id');
+         //console.log($(sender).prev('#MetaKey').val());
+         
+         var PageID = $('#Form_PageID').val();
+         var postValues = 'PageID=' + PageID + '&PageMetaID=' + PageMetaID + '&TransientKey=' + gdn.definition('TransientKey');
+         var action = gdn.definition('WebRoot') + '/edit/deletepagemeta/';
+         
+         $.ajax({
+            type: "POST",
+            url: action,
+            data: postValues,
+            dataType: 'json',
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+               $('div.Popup').remove();
+               $.popup({}, XMLHttpRequest.responseText);
+            },   
+            success: function(json) {
+               json = $.postParseJson(json);
+
+                  if (json.ErrorMessages) {
+                     $('.PostMeta h2').after('<div class="Messages Errors"><ul><li>' + json.ErrorMessages + '</li></ul></div>');
+                     json.ErrorMessages = null;
+                  } else {
+                     if (json.RedirectUrl) {
+                        document.location = json.RedirectUrl;
+                     } else {
+                       $(sender).parents('tr').remove();
+                       $('#MetaList').effect("highlight", {}, 2700);   
+                     }
+                  }
+                  gdn.inform(json);
+               },
+               complete: function(XMLHttpRequest, textStatus) {
+                  $('span.Progress').remove();
+               }
+            });
+         
+         
+         
+         console.log(postValues);
       }
    });
-
-
+   
    // Hijack "publish" or "save as draft" clicks and handle via ajax...
    $.fn.handlePageForm = function() {
       this.click(function() {
@@ -113,6 +202,11 @@ jQuery(document).ready(function($) {
                   gdn.inform(json);
                   $('span.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
                }
+               
+               if ($('#Form_PageID').length == 0) {
+                  $('.PostMeta').show(); //Enable the PageMeta selection
+                  $('#Form_hpt').after('<input type=\"hidden\" id=\"Form_PageID\" name=\"Page/PageID\" value=\"'+json.PageID+'\">');
+               };
                               
                if (json.RedirectUrl)
                  setTimeout("document.location='" + json.RedirectUrl + "';", 300);
@@ -137,6 +231,13 @@ jQuery(document).ready(function($) {
       });
    };
    $('#Form_Page :submit').handlePageForm();
+   
+   //When creating a new page, auto-save after setting page title
+   $('#Form_Name').blur(function() {
+      if ($('#Form_PageID').length == 0) {
+         $('#Form_SaveDraft').click();
+      };
+   });
    
 
 
@@ -257,5 +358,55 @@ jQuery(document).ready(function($) {
       $('#UrlCodeContainer').effect("highlight", {}, 1000);
 
    });
+   
+   function GetPageMeta () {
+      $('#TheList').empty();     
+      var action = gdn.definition('WebRoot') + '/edit/getpagemeta/';
+      var postValues;
+      postValues = '&PageID='+$('#Form_PageID').val();
+          
+      $.ajax({
+         type: "POST",
+         url: action,
+         data: postValues,
+         dataType: 'json',
+         error: function(XMLHttpRequest, textStatus, errorThrown) {
+            $('div.Popup').remove();
+            $.popup({}, XMLHttpRequest.responseText);
+         },   
+         success: function(json) {
+            json = $.postParseJson(json);
 
+               if (json.ErrorMessages) {
+                  $('.PostMeta h2').after('<div class="Messages Errors"><ul><li>' + json.ErrorMessages + '</li></ul></div>');
+                  json.ErrorMessages = null;
+               } else {
+                  if (json.RedirectUrl) {
+                     document.location = json.RedirectUrl;
+                  } else {
+                     console.log(json.PageMeta);
+                     $.each(json.PageMeta, function(key, val) {
+                         console.log('<li id="' + key + '">' + val.MetaAsset + '</li>');
+                         $('#TheList').prepend(
+                            '<tr id=\"' + val.PageMetaID + '\"><td>' + val.MetaKeyName + '<input type=\"hidden\" id=\"MetaKey\" value=\"' + val.MetaKey + '\" \>' +
+                            '<a href=\"' + gdn.definition('WebRoot') + '/edit/deletemeta\" class=\"DeleteMeta\">[X]</a></td><td>' + val.MetaAssetName +
+                             '</td><td>' + val.MetaValue + '</td></tr>');
+                     });
+                     if (json.PageMeta.length === 0) {
+                        $('#MetaList').hide();
+                     };
+                  }
+               }
+               gdn.inform(json);
+            },
+            complete: function(XMLHttpRequest, textStatus) {
+               $('span.Progress').remove();
+            }
+         });
+   }
+   if ($('#Form_PageID')) {
+      $('.PostMeta h2').append('<span class="Progress"></span>');
+      GetPageMeta();
+   };
+   
 });

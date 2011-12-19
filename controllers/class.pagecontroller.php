@@ -3,7 +3,7 @@
 
 class PageController extends VanillaCMSController {
 
-   public $Uses = array('Form', 'PageModel', 'DiscussionModel', 'CommentModel');
+   public $Uses = array('Form', 'PageModel', 'PageMetaModel', 'DiscussionModel', 'CommentModel');
 
    public function Initialize() {
       parent::Initialize();
@@ -50,7 +50,7 @@ class PageController extends VanillaCMSController {
          //Add sidemenu IF there is subpages (has to be before modules for correct sorting)
          $this->AddSideMenu($this->Page->UrlCode);
 
-         $this->Page->PageMeta = $this->PageModel->GetPageMeta($this->Page->PageID);
+         $this->Page->PageMeta = $this->PageMetaModel->Get($this->Page->PageID);
          foreach ($this->Page->PageMeta->Result() as $PageMeta) {
             
             if($PageMeta->MetaAsset) { //if is to be added to an asset

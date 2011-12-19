@@ -1,12 +1,6 @@
 <?php if (!defined('APPLICATION')) exit(); 
 $Session = Gdn::Session();
 
-foreach ($this->VanillaCMSModules as $key => $Module) {
-   echo '<input type="hidden" id="'.$key.'_ShowAssets" value="' . $Module['ShowAssets'] . '" />';
-   echo '<input type="hidden" id="'.$key.'_HelpText" value="' . $Module['HelpText'] . '" />';
-   echo '<input type="hidden" id="'.$key.'_ContentType" value="' . $Module['ContentType'] . '" />';
-}
-
 setcookie("admin", "1", time()+3600, '/');
 if (is_object($this->Page)) {
 	$HeaderText = T('Edit') . ': ' . $this->Page->Name;
@@ -44,9 +38,9 @@ echo $this->Form->TextBox('Name',
 echo '<div id="UrlCodeContainer">';
 echo Wrap(T('Page Url:'), 'strong') . '  ';
 echo Gdn::Request()->Url('&nbsp;', TRUE);
-$UrlCodeExploded = explode('/', $this->Form->GetValue('UrlCode'));
+$UrlCodeExploded = explode('/', $this->Page->UrlCode);
 $ThisUrlCode = $UrlCodeExploded[count($UrlCodeExploded) - 1];
-$ParentUrlCode = substr($this->Form->GetValue('UrlCode'), 0, -strlen($ThisUrlCode));
+$ParentUrlCode = substr($this->Page->UrlCode, 0, -strlen($ThisUrlCode));
 
 echo Wrap($ParentUrlCode, 'span', array('id' => 'ParentUrlCode'));
 echo Wrap($ThisUrlCode, 'span', array('id' => 'UrlCode'));
@@ -63,7 +57,7 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
 ?>
 <div class="PostMeta"><h2><?php echo T('Custom Fields'); ?></h2>
    <div id="MetaAjaxResponse"></div>
-   <table id="MetaList" <?php if(!property_exists($this, 'PageMetaData')) echo 'style="display:none"';?>>
+   <table id="MetaList">
       <thead>
          <tr>
             <th style="width:220px">
@@ -77,26 +71,7 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
             </th>
          </tr>
       </thead>
-      <tbody id="TheList">
-         <?php
-         if (property_exists($this, 'PageMetaData')) {
-            foreach ($this->PageMetaData->Result() as $PageMeta) {
-               echo '<tr><td>';
-               echo $PageMeta->MetaKeyName;
-               echo Anchor('['.T('Delete').']', '/vanillacms/edit/deletemeta', 'DeleteMeta');
-               echo '<a href="#editmeta" class="EditMeta">['.T('Edit').']</a>';
-               //echo Anchor('['.T('Edit').']', '#', 'EditMeta');
-               echo '<input type="hidden" id="Form_MetaKey[ ]" name="Page/MetaKey[ ]" value="'.$PageMeta->MetaKey.'|'.$PageMeta->MetaKeyName.'|'.$PageMeta->MetaValue.'|'.$PageMeta->MetaAsset.'|'.$PageMeta->MetaAssetName.'" />';
-               echo '</td><td>';
-               echo $PageMeta->MetaAssetName;
-               echo '</td><td>';
-               echo $PageMeta->MetaValue;
-               echo '</td></tr>';
-            }
-         }
-         
-         ?>
-      </tbody>
+      <tbody id="TheList"></tbody>
    </table>
    <strong><?php echo T('Add Custom Field'); ?></strong>
    <table id="NewMeta">
@@ -120,8 +95,8 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
             <td style="vertical-align:middle" id="NewMetaLeft" class="Left">
                <select style="margin-right:5px" id="MetaKeySelect" name="MetaKeySelect">
                   <optgroup label="<?php echo T('Extra Info'); ?>"><?php
-                     foreach ($this->AvailableMetaKeys as $Key => $Value) {
-                        echo '<option value="'.$Key.'">'.$Value.'</option>';                        
+                     foreach ($this->AvailableMetaKeys as $Key => $Module) {
+                        echo '<option value="'.$Key.'">'.$Module['Name'].'</option>';                        
                      } ?>
                   </optgroup>
                   <optgroup label="<?php echo T('CMS Modules'); ?>"><?php   

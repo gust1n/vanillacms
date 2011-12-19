@@ -371,60 +371,6 @@ class PageModel extends Gdn_Model {
       return $Valid;
    }
 			
-	/**
-	 * Adds meta information to pages
-	 *
-	 * @param int $PageID Selected page
-	 * @param string $Meta Array of all information to be saved 
-	 * @return none
-	 * @author Jocke Gustin
-	 */
-	public function AddPageMeta($PageID, $Meta)
-	{
-	   foreach ($Meta as $PageMeta) {
-            $this->SQL->Insert('PageMeta', array('PageID' => $PageID, 'MetaKey' => $PageMeta['MetaKey'],'MetaKeyName' => $PageMeta['MetaKeyName'], 'MetaValue' => $PageMeta['MetaValue'], 'MetaAsset' => $PageMeta['MetaAsset'], 'MetaAssetName' => $PageMeta['MetaAssetName']));
-      }
-	}
-	
-	/**
-	 * Removes all page meta from selected page. Do this before adding every time
-	 *
-	 * @param int $PageID Selected page
-	 * @return none
-	 * @author Jocke Gustin
-	 */
-	public function ClearPageMeta($PageID)
-	{
-	   $this->SQL->Delete('PageMeta', array('PageID' => $PageID));
-	}
-	
-	/**
-	 * Retrieves all pagemeta from selected page
-	 *
-	 * @param int $PageID Selected page
-	 * @param string $MetaKey (optional) set metakey to get information for a specific metakey
-	 * @return object SQL results.
-	 * @author Jocke Gustin
-	 */
-	public function GetPageMeta($PageID, $MetaKey = '')
-	{
-	   if ($MetaKey) {
-	      return $this->SQL
-            ->Select('pm.*')
-            ->Where('pm.PageID', $PageID)
-            ->Where('pm.MetaKey', $MetaKey)
-            ->From('PageMeta pm')
-            ->Get()
-            ->FirstRow();
-	   } else {
-	      return $this->SQL
-            ->Select('pm.*')
-            ->Where('pm.PageID', $PageID)
-            ->From('PageMeta pm')
-            ->Get();
-      }
-	}
-	
    /**
     * Updates selected field with passed value
     *

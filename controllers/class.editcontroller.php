@@ -5,7 +5,7 @@
 */
 class EditController extends Gdn_Controller {
 
-   public $Uses = array('Database', 'Form', 'PageModel', 'ActivityModel');
+   public $Uses = array('Database', 'Form', 'PageModel', 'PageMetaModel', 'ActivityModel');
    public function Initialize() {
       
       $this->Head = new HeadModule($this);
@@ -103,10 +103,10 @@ class EditController extends Gdn_Controller {
       // If were not adding, but editing an existing page
       if (is_numeric($PageID) && $PageID > 0) { 
          if ($this->Page = $this->PageModel->Get(array('PageID' => $PageID))) { //If page exists
+            
             $this->Title(T('Edit Page'));
             $this->Form->AddHidden('PageID', $this->Page->PageID);
-            //Set PageMeta
-            $this->PageMetaData = $this->PageModel->GetPageMeta($this->Page->PageID);
+            $this->Form->AddHidden('CodeIsDefined', '1'); //For the urlcode autofunction
             
          } else {
             Redirect('dashboard/home/filenotfound');
@@ -121,10 +121,14 @@ class EditController extends Gdn_Controller {
       if ($this->Form->AuthenticatedPostBack() === FALSE) {
 
          $this->Form->AddHidden('CodeIsDefined', '0'); //For the urlcode autofunction
+         
 
          if($this->Page) { //Set the form for editing existing page
             $this->Form->SetData($this->Page);
-         }	
+            $this->Form->AddHidden('CodeIsDefined', '1'); //For the urlcode autofunction
+         } else {
+            $this->Form->SetFormValue('InMenu', 1); //Show in menu by default
+         }
 
       } 
       else { //If saving
@@ -144,25 +148,27 @@ class EditController extends Gdn_Controller {
                TODO Fix ajax-updating when editing instead of this crappy solution
             */
             //PAGEMETA
-            $this->PageModel->ClearPageMeta($PageID);
-            if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
-               foreach ($MetaArray as $Key => $Meta) {
-                  $ExplodedMeta = explode('|', $Meta);
-                  $SingleMeta = array();
-                  $SingleMeta['MetaKey'] = $ExplodedMeta[0];
-                  $SingleMeta['MetaKeyName'] = $ExplodedMeta[1];
-                  $SingleMeta['MetaValue'] = $ExplodedMeta[2];
-                  $SingleMeta['MetaAsset'] = $ExplodedMeta[3];
-                  $SingleMeta['MetaAssetName'] = $ExplodedMeta[4];
-                  
-                  //echo $SingleMeta['MetaValue'];
-                   
-                  $NewArray[$ExplodedMeta[0]] = $SingleMeta;
-               }
-            }
-            if (isset($NewArray)) {
-               $this->PageModel->AddPageMeta($PageID, $NewArray);
-            }
+            /*
+            $this->PageMetaModel->ClearPageMeta($PageID);
+                        if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
+                           foreach ($MetaArray as $Key => $Meta) {
+                              $ExplodedMeta = explode('|', $Meta);
+                              $SingleMeta = array();
+                              $SingleMeta['MetaKey'] = $ExplodedMeta[0];
+                              $SingleMeta['MetaKeyName'] = $ExplodedMeta[1];
+                              $SingleMeta['MetaValue'] = $ExplodedMeta[2];
+                              $SingleMeta['MetaAsset'] = $ExplodedMeta[3];
+                              $SingleMeta['MetaAssetName'] = $ExplodedMeta[4];
+                              
+                              //echo $SingleMeta['MetaValue'];
+                               
+                              $NewArray[$ExplodedMeta[0]] = $SingleMeta;
+                           }
+                        }
+                        if (isset($NewArray)) {
+                           $this->PageModel->AddPageMeta($PageID, $NewArray);
+                        }*/
+            
             
             //ROUTES
             if (isset($this->SavedPage->RouteIndex))
@@ -187,6 +193,9 @@ class EditController extends Gdn_Controller {
                $this->StatusMessage = T('Page saved as draft at') .' '. Gdn_Format::Date(); 
             }
             
+            //Set PageID for outputting if new page
+            $this->SetJson('PageID', $PageID);
+            
             /*
                TODO This does not work properly
             */
@@ -200,7 +209,7 @@ class EditController extends Gdn_Controller {
                   $this->SavedPage->UrlCode,
                   FALSE);
                   
-               $this->RedirectUrl = Url('edit/' . $PageID);  
+               //$this->RedirectUrl = Url('edit/' . $PageID);  
                unset($this->SavedPage);
             } else {
                $NewActivityID = $this->ActivityModel->Add(
@@ -228,7 +237,6 @@ class EditController extends Gdn_Controller {
       $this->DashboardModules = C('VanillaCMS.DashboardModules');
       $this->VanillaModules = C('VanillaCMS.VanillaModules');
 
-      
       //Render array with available assets
       $this->AvailableAssets = $this->_AvailableAssets();
       
@@ -317,10 +325,29 @@ class EditController extends Gdn_Controller {
          TODO Render dynamically
       */
       return array(
-      'MetaDescription' => T('Meta Description'),
-      'MetaKeywords' => T('Meta Keywords'),
-      'CustomCss' => T('Custom CSS') 
+      'MetaDescription' => array(
+                           'Name' => T('Meta Description'),
+                           'Description' => 'Short description of page, for SEO',
+                           'HelpText' => 'Description',
+                           'ShowAssets' => false,
+                           'ContentType' => 'textarea'
+                           ),
+      'MetaKeywords' =>    array(
+                              'Name' => T('Meta Keywords'),
+                              'Description' => 'Keywords related to the page, for SEO',
+                              'HelpText' => 'Keywords sepratated by , (comma)',
+                              'ShowAssets' => false,
+                              'ContentType' => 'text'
+                              ),
+      'CustomCss' =>    array(
+                              'Name' => T('Custom CSS'),
+                              'Description' => 'Page-specific CSS',
+                              'HelpText' => 'Enter CSS',
+                              'ShowAssets' => false,
+                              'ContentType' => 'textarea'
+                              ), 
       );
+      
    }
    
    private function _AvailableModules() {
@@ -357,14 +384,32 @@ class EditController extends Gdn_Controller {
       unset($AvailableModules['ShareModule']);
       unset($AvailableModules['DiscussPageModule']);
       
-      /*
-      echo '<pre>';            
-                        print_r($AvailableModules);
-                        die('</pre>');*/
-      
-      
       return $AvailableModules;
    }
+   
+   public function AvailableModules($Output = 'json')
+   {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      
+      
+      $AvailableMetaKeys = self::_AvailableMetaKeys();
+      $VanillaCMSModules = self::_AvailableModules();
+      $DashboardModules = C('VanillaCMS.DashboardModules');
+      $VanillaModules = C('VanillaCMS.VanillaModules');
+      
+      $AllModules = $AvailableMetaKeys + $VanillaCMSModules + $DashboardModules + $VanillaModules;
+      
+      if ($Output == 'json') {
+         $this->DeliveryType(DELIVERY_TYPE_BOOL);
+         $this->DeliveryMethod(DELIVERY_METHOD_JSON);
+         $this->SetJson('Modules', $AllModules);
+      } else {
+         return $AllModules;
+      }
+      
+      $this->Render();
+   }
+   
    private function _ScanModule($ModuleFile) {
       // Find the $PluginInfo array
       $Lines = file($ModuleFile);
@@ -382,6 +427,7 @@ class EditController extends Gdn_Controller {
       unset($Lines);      
       return $ClassName;
    }
+   
    /**
     * Returns available assets for placing stuff in
     *
@@ -400,6 +446,123 @@ class EditController extends Gdn_Controller {
          'Box3' => T('Box3')  
       );
    }
+   
+   /**
+    * Adds PageMeta submitted by ajax
+    *
+    * @author Jocke Gustin
+    **/
+   public function AddPageMeta() {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $this->DeliveryType(DELIVERY_TYPE_BOOL);
+      $this->DeliveryMethod(DELIVERY_METHOD_JSON);
+      $this->SetHeader('Content-Type', 'application/json');
+      
+      $TransientKey = GetIncomingValue('TransientKey', '');
+      $PageID = GetIncomingValue('PageID', '');
+      $MetaKey = GetIncomingValue('MetaKey', '');
+      $MetaKeyName = GetIncomingValue('MetaKeyName', '');
+      $MetaValue = htmlspecialchars(GetIncomingValue('MetaValue', '')) ;
+      $MetaAsset = GetIncomingValue('MetaAsset', '');
+      $MetaAssetName = GetIncomingValue('MetaAssetName', '');
+      
+      $InfoArray = GetIncomingValue('InfoArray', '');
+      $InfoArray = self::AvailableModules('echo');
+      
+
+      
+      $ApplicationFolder = 'vanillacms';
+      if ($InfoArray[$MetaKey]['ApplicationFolder']) {
+         $ApplicationFolder = $InfoArray[$MetaKey]['ApplicationFolder'];
+      }
+      $GetData = 0;
+      if ($InfoArray[$MetaKey]['GetData'] == 1) {
+         $GetData = 1;
+      }
+      $ConfigSetting = '';
+      if ($InfoArray[$MetaKey]['ConfigSetting']) {
+         $ConfigSetting = $InfoArray[$MetaKey]['ConfigSetting'];
+      }
+      
+      $PageMeta = array(
+         'TransientKey' => $TransientKey,
+         'PageID' => $PageID,
+         'MetaKey' => $MetaKey,
+         'MetaKeyName' => $MetaKeyName,
+         'MetaValue' => $MetaValue,
+         'MetaAsset' => $MetaAsset,
+         'MetaAssetName' => $MetaAssetName,
+         'ApplicationFolder' => $ApplicationFolder,
+         'GetData' => $GetData,
+         'ConfigSetting' => $ConfigSetting,
+      );
+      
+      $PageID = $this->PageMetaModel->Save($PageMeta);
+      
+      // if ($PageID) {
+      //          if ($PageMeta = $this->PageMetaModel->Get($PageID)) {
+      //             $this->SetJson('PageMeta', $PageMeta->Result());
+      //          } else {
+      //             $this->ErrorMessage(T('There was a problem retrieving your Custom Fields'));
+      //          }
+      //       }
+      //$this->SetJson('PageMeta', $InfoArray);
+      $this->Render();
+   }
+   
+   /**
+    * Fetches the PageMeta of the Page and returns via json
+    *
+    * @author Jocke Gustin
+    **/
+   public function GetPageMeta($PageID = '') {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $this->DeliveryType(DELIVERY_TYPE_BOOL);
+      $this->DeliveryMethod(DELIVERY_METHOD_JSON);
+      
+      $PageID = GetIncomingValue('PageID', '');
+      $this->SetHeader('Content-Type', 'application/json');
+      if ($PageID) {
+         if ($PageMeta = $this->PageMetaModel->Get($PageID)) {
+            $this->SetJson('PageMeta', $PageMeta->Result());
+         } else {
+            $this->ErrorMessage(T('There was a problem retrieving your Custom Fields'));
+         }
+      }
+      
+      $this->Render();
+   }
+   
+   /**
+    * This is the back-end function to the ajax delete call
+    *
+    * @author Jocke Gustin
+    **/
+   public function DeletePageMeta($PageMetaID = '', $TransientKey = '') {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $Session = Gdn::Session();
+      $this->DeliveryType(DELIVERY_TYPE_BOOL);
+      $this->DeliveryMethod(DELIVERY_METHOD_JSON);
+      $this->SetHeader('Content-Type', 'application/json');
+      
+      $TransientKey = GetIncomingValue('TransientKey', '');
+      
+      if ($Session->ValidateTransientKey($TransientKey)) {
+         $PageMetaID = GetIncomingValue('PageMetaID', '');
+         
+         if ($PageMetaID) {
+            if (!$this->PageMetaModel->Delete($PageMetaID)) {
+               $this->ErrorMessage(T('There was a problem deleting the Custom Field'));
+            }
+         }   
+      } else {
+          $this->ErrorMessage(T('You do not have permission to do that.'));
+      }
+        
+      $this->Render();
+   }
+   
+   
    /**
     * Publishes, unpablishes (sets as draft) or deletes page
     *

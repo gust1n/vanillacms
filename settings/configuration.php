@@ -32,16 +32,28 @@ $Configuration['VanillaCMS']['CoreTemplates'] = array(
 $Configuration['VanillaCMS']['DashboardModules'] = array(
                                                       'GuestModule' => array(
                                                                            'Name' => 'Guest Module',
+                                                                           'Description' => 'Displays info about login/signup',
+                                                                           'HelpText' => 'Test',
+                                                                           'ShowAssets' => true,
+                                                                           'ContentType' => 'none',
                                                                            'ApplicationFolder' => 'dashboard',
                                                                            'ConfigSetting' => 'Garden.Modules.ShowGuestModule'
                                                       ),
                                                       'RecentActivityModule' => array(
                                                                            'Name' => 'Recent Activity',
+                                                                           'Description' => 'Displays site-wide recent activity',
+                                                                           'HelpText' => 'No of activities to display',
+                                                                           'ShowAssets' => true,
+                                                                           'ContentType' => 'text',
                                                                            'ApplicationFolder' => 'dashboard',
                                                                            'GetData' => 1
                                                       ),
                                                       'RecentUserModule' => array(
                                                                            'Name' => 'Recent Users',
+                                                                           'Description' => 'Displays recent users',
+                                                                           'HelpText' => 'No of users to display',
+                                                                           'ShowAssets' => true,
+                                                                           'ContentType' => 'text',
                                                                            'ApplicationFolder' => 'dashboard',
                                                                            'ConfigSetting' => 'Garden.Modules.ShowRecentUserModule'
                                                       )
@@ -49,19 +61,35 @@ $Configuration['VanillaCMS']['DashboardModules'] = array(
 $Configuration['VanillaCMS']['VanillaModules'] = array(
                                                    'CategoriesModule' => array(
                                                                         'Name' => 'Forum Categories',
+                                                                        'Description' => 'Displays forum categories',
+                                                                        'HelpText' => '',
+                                                                        'ShowAssets' => true,
+                                                                        'ContentType' => 'none',
                                                                         'ApplicationFolder' => 'vanilla'
                                                    ),
                                                    'BookmarkedModule' => array(
                                                                         'Name' => 'Forum Bookmarks',
+                                                                        'Description' => 'Displays current users bookmarked discussions',
+                                                                        'HelpText' => '',
+                                                                        'ShowAssets' => true,
+                                                                        'ContentType' => 'none',
                                                                         'ApplicationFolder' => 'vanilla',
                                                                         'ConfigSetting' => 'Vanilla.Modules.ShowBookmarkedModule'
                                                    ),
                                                    'NewDiscussionModule' => array(
                                                                         'Name' => 'New discussion button',
+                                                                        'Description' => 'Displays button for creating new discussion',
+                                                                        'HelpText' => '',
+                                                                        'ShowAssets' => true,
+                                                                        'ContentType' => 'none',
                                                                         'ApplicationFolder' => 'vanilla'
                                                    ),
                                                    'DiscussionsModule' => array(
                                                                         'Name' => 'Forum Discussions',
+                                                                        'Description' => 'Displays most recent discussions',
+                                                                        'HelpText' => 'No of discussions to display',
+                                                                        'ShowAssets' => true,
+                                                                        'ContentType' => 'text',
                                                                         'ApplicationFolder' => 'vanilla',
                                                                         'GetData' => 1
                                                    )
