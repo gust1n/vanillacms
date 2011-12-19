@@ -7,15 +7,40 @@ $Configuration['VanillaCMS']['Installed'] = '0';
 $Configuration['VanillaCMS']['Copyright'] = '© '.date('Y').' Vanilla CMS by <a href="http://jockegustin.se">Jocke Gustin</a>';
 //Prevent application from saving over routes to vanilla core-applications
 $Configuration['VanillaCMS']['ReservedUrlCodes'] = array(
-                                                   'discussions' => 'All discussions',
-                                                   'discussion' => 'Single Discusson',
                                                    'categories' => 'Forum Categories',
+                                                   'categoriy' => 'Forum Category',
+                                                   'discussion' => 'Single discussions',
+                                                   'discussions' => 'All Discusson',
+                                                   'drafts' => 'Forum Drafts',
+                                                   'vanilla' => 'Vanilla application',
+                                                   'moderation' => 'Forum moderation',
+                                                   'post' => 'Post Discussion',
                                                    'activity' => 'Recent Activity',
+                                                   'authentication' => 'Dashboard application',
+                                                   'dashboard' => 'Dashboard application',
+                                                   'embed' => 'Embed vanilla',
+                                                   'home' => 'Static files',
+                                                   'import' => 'Dashboard application',
+                                                   'log' => 'Dashboard application',
+                                                   'message' => 'Dashboard application',
+                                                   'module' => 'Dashboard application',
+                                                   'notifications' => 'Dashboard application',
+                                                   'plugin' => 'Dashboard application',
+                                                   'session' => 'Dashboard application',
+                                                   'settings' => 'Dashboard application',
+                                                   'modules' => 'Dashboard application',
                                                    'messages' => 'Conversations application',
                                                    'profile' => 'Profile Page',
+                                                   'role' => 'Dashboard application',
+                                                   'routes' => 'Dashboard application',
+                                                   'setup' => 'Dashboard application',
+                                                   'statistics' => 'Dashboard application',
+                                                   'user' => 'Dashboard application',
+                                                   'utility' => 'Dashboard application',
                                                    'search' => 'Search',
                                                    'dashboard' => 'Dashboard',
-                                                   'entry' => 'Sign in/out'
+                                                   'entry' => 'Sign in/out',
+                                                   'conversations' => 'Conversations application'
                                                    );
 //Core functions that are allowed to create menu-items
 $Configuration['VanillaCMS']['CoreTemplates'] = array(
