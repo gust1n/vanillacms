@@ -418,6 +418,10 @@ class PageModel extends Gdn_Model {
 	     return;
 	   }
 	   
+	   if ($PageID == -1) { //Never save for page root
+	     return;
+	   }
+	   
 	   //Check for reserved UrlCodes
 	   $UrlCodeExploded = explode('/', $Page->UrlCode); //First get the first part, so we're not saving over a reserved sub-url
 	   if (array_key_exists($UrlCodeExploded[0], C('VanillaCMS.ReservedUrlCodes'))) {
