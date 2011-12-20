@@ -50,7 +50,7 @@ if ($Drop || !$PageTableExists) {
    
    $SQL->Insert('Page', array('PageID' => 2, 'TreeLeft' => 3, 'TreeRight' => 4, 'Depth' => 2, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Discussions', 'UrlCode' => 'discussions', 'InMenu' => 1, 'ParentPageID' => 1, 'Template' => 'discussions', 'Body' => 'This is the example page of the Discussion template. This text should not be visible... Anywhere! (Unless you change the page template)'));
    
-   $SQL->Insert('Page', array('PageID' => 3, 'TreeLeft' => 5, 'TreeRight' => 6, 'Depth' => 2, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Inbox', 'UrlCode' => 'messages/all', 'InMenu' => 1, 'ParentPageID' => 1, 'Template' => 'conversations', 'Body' => 'This is the example page of the Inbox template. This text should not be visible... Anywhere! (Unless you change the page template)'));
+   $SQL->Insert('Page', array('PageID' => 3, 'TreeLeft' => 5, 'TreeRight' => 6, 'Depth' => 2, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Inbox', 'UrlCode' => 'messages/all', 'InMenu' => 1, 'ParentPageID' => 1, 'Template' => 'messages/all', 'Body' => 'This is the example page of the Inbox template. This text should not be visible... Anywhere! (Unless you change the page template)'));
 }
 
 
