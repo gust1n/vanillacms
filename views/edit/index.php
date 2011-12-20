@@ -41,7 +41,9 @@ echo Gdn::Request()->Url('&nbsp;', TRUE);
 $UrlCodeExploded = explode('/', $this->Page->UrlCode);
 $ThisUrlCode = $UrlCodeExploded[count($UrlCodeExploded) - 1];
 $ParentUrlCode = substr($this->Page->UrlCode, 0, -strlen($ThisUrlCode));
-
+/*
+   TODO Fix to not override urlcode if core template isset
+*/
 echo Wrap($ParentUrlCode, 'span', array('id' => 'ParentUrlCode'));
 echo Wrap($ThisUrlCode, 'span', array('id' => 'UrlCode'));
 echo $this->Form->TextBox('UrlCode', array('value' => $ThisUrlCode));
