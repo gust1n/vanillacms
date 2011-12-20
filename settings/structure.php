@@ -42,6 +42,9 @@ if ($SQL->GetWhere('Page', array('PageID' => -1))->NumRows() == 0) {
    $SQL->Insert('Page', array('PageID' => -1, 'TreeLeft' => 1, 'TreeRight' => 8, 'Depth' => 0, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Root', 'UrlCode' => '', 'Body' => 'Root of category tree. Users should never see this.'));
 }
 if ($Drop || !$PageTableExists) {
+   if (!class_exists('PageModel')) {
+      include(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'models' . DS . 'class.pagemodel.php');
+   }
    $PageModel = new PageModel($this);
    
    $SQL->Insert('Page', array('PageID' => 1, 'TreeLeft' => 2, 'TreeRight' => 7, 'Depth' => 1, 'InsertUserID' => 1, 'UpdateUserID' => 1, 'DateInserted' => Gdn_Format::ToDateTime(), 'Name' => 'Example Page', 'UrlCode' => 'example-page', 'InMenu' => 1, 'ParentPageID' => -1, 'Body' => '<strong>Hey there, World!</strong><p>This is your first page, enter the dashboard to edit or add pages!</p>'));

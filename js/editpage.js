@@ -89,7 +89,7 @@ jQuery(document).ready(function($) {
                $('#MetaList').effect("highlight", {}, 2700);
                gdn.inform(json);
             }
-                           
+
             if (json.RedirectUrl)
               setTimeout("document.location='" + json.RedirectUrl + "';", 300);
          },

@@ -54,7 +54,9 @@ class PageModel extends Gdn_Model {
    		'PageID' => '', 'Exclude' => '', 'IncludeDeleted' => false,
    		'UrlCode' => '', 'Status' => 'all'
    	);
-   	
+   	if (!class_exists('VanillaCMSController')) {
+         include(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'controllers' . DS . 'class.vanillacmscontroller.php');
+      }
    	$r = VanillaCMSController::ParseArgs($Args, $Defaults);	   	
    	extract( $r, EXTR_SKIP );
 	   
