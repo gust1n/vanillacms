@@ -43,31 +43,6 @@ class VanillaCMSHooks implements Gdn_IPlugin {
       $Sender->Menu->RemoveGroup('Conversations');
       $Sender->Menu->RemoveLinks('Discussions');
    }
-      
-   public function Base_Render_After(&$Sender) {
-      //We must reset the previous setting after my ugly (and perfect) fix
-      
-      foreach (C('VanillaCMS.TempModule') as $Value => $i) {
-         $Setting = '';
-         $Setting .= $Value . '.';         
-         
-         foreach ($i as $Value => $i) {
-            $Setting .= $Value . '.'; 
-            
-            foreach ($i as $Value => $i) {
-               $Setting .= $Value;
-            }
-         }       
-         if (C('VanillaCMS.TempModule.' . $Setting)) {
-            SaveToConfig($Setting, C('VanillaCMS.TempModule.' . $Setting));
-         } else {
-            SaveToConfig($Setting, FALSE);
-         }
-         RemoveFromConfig('VanillaCMS.TempModule.' . $Setting, '');
-      }
-      
-      
-   }
         
    public function ProfileController_Render_Before($Sender) {
       $Sender->AddCSSFile('plugins/Voting/design/voting.css');

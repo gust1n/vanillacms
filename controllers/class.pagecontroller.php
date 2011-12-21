@@ -61,8 +61,7 @@ class PageController extends VanillaCMSController {
 
                //Temporarily set config, due to how the external modeules load we have to make this #€%*&# ugly (but working) solution
                if ($PageMeta->ConfigSetting) {
-                  SaveToConfig('VanillaCMS.TempModule.' . $PageMeta->ConfigSetting, C($PageMeta->ConfigSetting)); //Save prev state for restoring after render
-                  SaveToConfig($PageMeta->ConfigSetting, TRUE); 
+                  SaveToConfig($PageMeta->ConfigSetting, TRUE, FALSE); //Set only to last this request
                }
                
                if ($PageMeta->ApplicationFolder == 'vanillacms') {
