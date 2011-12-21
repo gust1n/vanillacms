@@ -9,8 +9,10 @@ if (is_object($this->Page)) {
    $HeaderText = T('Add '. $this->Type);
    //echo "<script type='text/javascript'>jQuery(document).ready(function($) { $('#Form_Permission').attr('checked', true); });</script>";
 }
+/*
+   TODO Move to Controller
+*/
 if (array_key_exists($this->Page->Template, C('VanillaCMS.CoreTemplates'))) {
-   echo '<style type="text/css">.ParentNotOptional{display:none}</style>';
    echo '<input type="hidden" id="IsCoreTemplate" value="true" />';
 } else {
    echo '<input type="hidden" id="IsCoreTemplate" value="false" />';
@@ -28,9 +30,9 @@ echo $this->Form->TextBox('Name',
    array(
    'class' => 'InputBox PageName', 
    'autocomplete' => 'off', 
-   'value' => $value,
+   'value' => $value/*,
    'onfocus' => "if (this.value == '$value') {this.value = '';}",
-   'onblur' => "if (this.value == '') {this.value = '$value';}"
+   'onblur' => "if (this.value == '') {this.value = '$value';}"*/
    ));
 /*<input id="s" name="s" type="text" value="' . $value . '" onfocus="if (this.value == \'' . $value . '\') {this.value = \'\';}" onblur="if (this.value == \'\') {this.value = \'' . $value . '\';}" size="'. $search_form_length .'" tabindex="1" />*/
 

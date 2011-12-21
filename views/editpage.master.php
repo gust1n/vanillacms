@@ -12,13 +12,6 @@
    }
    ?>
 </head>
-<script type="text/javascript">
-   jQuery(document).ready(function($) {
-
-      //var obj = jQuery.parseJSON('<?php echo json_encode($this->AllModules); ?>');
-            
-   });
-</script>
 <body id="<?php echo $BodyIdentifier; ?>" class="<?php echo $this->CssClass; ?>">
    <div id="Frame">
       <div id="Head">
