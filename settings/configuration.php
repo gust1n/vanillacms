@@ -80,7 +80,8 @@ $Configuration['VanillaCMS']['DashboardModules'] = array(
                                                                            'ShowAssets' => true,
                                                                            'ContentType' => 'text',
                                                                            'ApplicationFolder' => 'dashboard',
-                                                                           'ConfigSetting' => 'Garden.Modules.ShowRecentUserModule'
+                                                                           'ConfigSetting' => 'Garden.Modules.ShowRecentUserModule',
+                                                                           'GetData' => 1
                                                       )
                                                    );
 $Configuration['VanillaCMS']['VanillaModules'] = array(
