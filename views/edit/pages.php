@@ -28,7 +28,7 @@ $Session = Gdn::Session();
 <?php echo $this->Form->Errors(); ?>
 
 		<?php		
-		echo Wrap(T('Organize Pages'), 'h1') . '<ol class="Sortable">';
+		echo Wrap(T('Organize Pages') . '<span class="Progress"></span>', 'h1') . '<ol class="Sortable">';
 		
       $Right = array(); // Start with an empty $Right stack
       $LastRight = 0;
