@@ -12,7 +12,9 @@ if (is_object($this->Page)) {
 /*
    TODO Move to Controller
 */
+$IsCoreTemplate = false;
 if (array_key_exists($this->Page->Template, C('VanillaCMS.CoreTemplates'))) {
+   $IsCoreTemplate = true;
    echo '<input type="hidden" id="IsCoreTemplate" value="true" />';
 } else {
    echo '<input type="hidden" id="IsCoreTemplate" value="false" />';
@@ -30,11 +32,8 @@ echo $this->Form->TextBox('Name',
    array(
    'class' => 'InputBox PageName', 
    'autocomplete' => 'off', 
-   'value' => $value/*,
-   'onfocus' => "if (this.value == '$value') {this.value = '';}",
-   'onblur' => "if (this.value == '') {this.value = '$value';}"*/
+   'value' => $value
    ));
-/*<input id="s" name="s" type="text" value="' . $value . '" onfocus="if (this.value == \'' . $value . '\') {this.value = \'\';}" onblur="if (this.value == \'\') {this.value = \'' . $value . '\';}" size="'. $search_form_length .'" tabindex="1" />*/
 
 //UrlCode
 echo '<div id="UrlCodeContainer">';
@@ -43,11 +42,15 @@ echo Gdn::Request()->Url('&nbsp;', TRUE);
 $UrlCodeExploded = explode('/', $this->Page->UrlCode);
 $ThisUrlCode = $UrlCodeExploded[count($UrlCodeExploded) - 1];
 $ParentUrlCode = substr($this->Page->UrlCode, 0, -strlen($ThisUrlCode));
-/*
-   TODO Fix to not override urlcode if core template isset
-*/
-echo Wrap($ParentUrlCode, 'span', array('id' => 'ParentUrlCode'));
-echo Wrap($ThisUrlCode, 'span', array('id' => 'UrlCode'));
+
+if ($IsCoreTemplate) {
+   echo Wrap($this->Page->UrlCode, 'span', array('id' => 'ParentUrlCode'));
+   echo Wrap('', 'span', array('id' => 'UrlCode'));
+} else {
+   echo Wrap($ParentUrlCode, 'span', array('id' => 'ParentUrlCode'));
+   echo Wrap($ThisUrlCode, 'span', array('id' => 'UrlCode'));
+}
+
 echo $this->Form->TextBox('UrlCode', array('value' => $ThisUrlCode));
 echo Anchor(T('edit'), '#', 'EditUrlCode UrlToggle');
 echo Anchor(T('OK'), '#', 'SaveUrlCode SmallButton UrlToggle');

@@ -404,7 +404,8 @@ jQuery(document).ready(function($) {
    
    //If is a core template, hide all field that should be non-available
    if ($('#IsCoreTemplate').val() === "true") {
-      $('.ParentNotOptional').hide();
+      $('.ParentNotOptional, .EditUrlCode, #UrlCode').hide();
+      
    }
    
    //Get the ModulesInfo array
