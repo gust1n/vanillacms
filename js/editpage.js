@@ -253,7 +253,9 @@ jQuery(document).ready(function($) {
                   json.ErrorMessages = null;
                } else {
                   gdn.inform(json);
-                  $('span.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
+                  if (json.InformMessages) {
+                     $('span.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
+                  };
                }
 
                if ($('#Form_PageID').length === 0) {
@@ -263,7 +265,7 @@ jQuery(document).ready(function($) {
 
                if (json.RedirectUrl) {
                   setTimeout("document.location='" + json.RedirectUrl + "';", 300);
-               }   
+               }
             },
             complete: function(XMLHttpRequest, textStatus) {
                //Update the visit link with proper href

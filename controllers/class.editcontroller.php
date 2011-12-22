@@ -188,9 +188,12 @@ class EditController extends Gdn_Controller {
                                    
             //Page Status (detect which button clicked)
             if ($this->SavedPage->Status == 'published') {
-               $this->StatusMessage = T('Page published at') .' ' . Gdn_Format::Date();               
+               $this->StatusMessage = T('Page published') .' ' . T('at') . ' ' . Gdn_Format::Date();               
             } elseif ($this->SavedPage->Status == 'draft') {
-               $this->StatusMessage = T('Page saved as draft at') .' '. Gdn_Format::Date(); 
+               $this->StatusMessage = T('Page saved as draft') .' '. T('at') . ' ' . Gdn_Format::Date(); 
+            } elseif ($this->SavedPage->SavedPage == 'trash') {
+               $this->StatusMessage = T('Page moved to the Trash') .' '. T('at') . ' ' . Gdn_Format::Date();
+               $this->RedirectUrl = Url('pages/trash');
             }
             
             //Set PageID for outputting if new page
