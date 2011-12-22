@@ -51,7 +51,7 @@ class PageModel extends Gdn_Model {
 	   
 	   $Defaults = array(
    		'OrderBy' => 'Sort', 'ParentPageID' => '',
-   		'PageID' => '', 'Exclude' => '', 'IncludeDeleted' => false,
+   		'PageID' => '', 'Exclude' => '', 'IncludeTrash' => false,
    		'UrlCode' => '', 'Status' => 'all'
    	);
       if (!class_exists('VanillaCMSController')) {
@@ -72,8 +72,8 @@ class PageModel extends Gdn_Model {
 			   
 			$FirstRow = false;
 	      
-	      if (!$IncludeDeleted) {
-	        $this->SQL->Where('p.Status <>', 'deleted');
+	      if (!$IncludeTrash) {
+	        $this->SQL->Where('p.Status <>', 'trash');
 	      }
 	      if ($PageID) {
 	        $this->SQL->Where('p.PageID', $PageID);
@@ -113,7 +113,7 @@ class PageModel extends Gdn_Model {
     */
    public function SaveTree($TreeArray) {
 
-      $PermTree = $this->SQL->Select('PageID, TreeLeft, TreeRight, Depth, Template, Sort, ParentPageID, UrlCode')->From('Page')->Where('Status <>', 'deleted')->Get();
+      $PermTree = $this->SQL->Select('PageID, TreeLeft, TreeRight, Depth, Template, Sort, ParentPageID, UrlCode')->From('Page')->Where('Status <>', 'trash')->Get();
       $PermTree = $PermTree->Index($PermTree->ResultArray(), 'PageID');
 
       usort($TreeArray, array('PageModel', '_TreeSort'));
@@ -215,7 +215,7 @@ class PageModel extends Gdn_Model {
       foreach ($Pages as &$Page) {
          if (!isset($Page['PageID']))
             continue;
-         if ($Page['Status'] == 'deleted')
+         if ($Page['Status'] == 'trash')
             continue;
          
          // Backup Page settings for efficient database saving.
@@ -417,7 +417,7 @@ class PageModel extends Gdn_Model {
 	   if (isset($PageID) && is_numeric($PageID)) { //Deleting a single page
 	      $this->SQL->Delete('Page', array('PageID' => $PageID));
 	   } else { //Emtying trash
-	      $this->SQL->Delete('Page', array('Status' => 'deleted'));
+	      $this->SQL->Delete('Page', array('Status' => 'trash'));
 	   }
 	   return TRUE;
 	}

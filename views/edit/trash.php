@@ -1,6 +1,6 @@
 <?php	if (!defined('APPLICATION')) exit();	
-echo '<h1>' . T('Showing deleted pages') . Anchor(T('Empty Trash'),'edit/delete/all/' . $Session->TransientKey(), array('class' => 'SmallButton DeleteMessage EmptyTrash')). '</h1>';
-echo '<table class="Pages deleted">';
+echo '<h1>' . T('Showing trash can') . Anchor(T('Empty Trash'),'edit/delete/all/' . $Session->TransientKey(), array('class' => 'SmallButton DeleteMessage EmptyTrash')). '</h1>';
+echo '<table class="Pages trash">';
 foreach ($this->AllPages->Result() as $Page) {
    if ($Page->PageID == -1) {
       continue;

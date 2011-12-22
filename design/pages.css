@@ -1,8 +1,8 @@
 table.Pages strong{display:block}
 table.draft {border-color:#ccc;background:#eee}
 table.draft td{background:#eee}
-table.deleted {border-color:#999;background:#FDA9A3}
-table.deleted td{background:#FDA9A3}
+table.trash {border-color:#999;background:#FDA9A3}
+table.trash td{background:#FDA9A3}
 /*ol.Sortable table.NotInMenu{border: 1px dotted #000;}*/
 ol.Sortable td.AuthorDate{position: absolute;right: 200px;text-align: right;}
 ol.Sortable.disabled{color:#777}

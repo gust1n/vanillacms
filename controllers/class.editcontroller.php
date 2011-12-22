@@ -47,15 +47,15 @@ class EditController extends Gdn_Controller {
       $this->Filter = $Filter;
       
       $this->AllPages = $this->PageModel->Get(array('Status' => $this->Filter));
-      if ($this->Filter == 'deleted') {
-         $this->AllPages = $this->PageModel->Get(array('Status' => $this->Filter, 'IncludeDeleted' => true));
+      if ($this->Filter == 'trash') {
+         $this->AllPages = $this->PageModel->Get(array('Status' => $this->Filter, 'IncludeTrash' => true));
       }
       
       
-      $this->CountPages = $this->PageModel->Get(array('IncludeDeleted' => true));
+      $this->CountPages = $this->PageModel->Get(array('IncludeTrash' => true));
       $PublishedCount = 0;
       $UnpublishedCount = 0;
-      $DeletedCount = 0;
+      $TrashCount = 0;
                   
       foreach ($this->CountPages->Result() as $Page) {
          if ($Page->PageID > 0) {
@@ -64,14 +64,14 @@ class EditController extends Gdn_Controller {
             } elseif ($Page->Status == 'draft') {
                $UnpublishedCount++;
             } else {
-               $DeletedCount++;
+               $TrashCount++;
             }
          } 
       }
       
       $this->PublishedCount = $PublishedCount;
       $this->UnpublishedCount = $UnpublishedCount;
-      $this->DeletedCount = $DeletedCount;
+      $this->TrashCount = $TrashCount;
          
       $this->Render();
    }
@@ -575,16 +575,16 @@ class EditController extends Gdn_Controller {
       $Session = Gdn::Session();
 
       if ($TransientKey !== FALSE && $Session->ValidateTransientKey($TransientKey)) {
-         if ($Status == 'published' || $Status == 'draft' || $Status == 'deleted') {
+         if ($Status == 'published' || $Status == 'draft' || $Status == 'trash') {
 
             if ($this->PageModel->Update('Status', $PageID, $Status)) {
                if ($Status == 'draft') {
                   $this->PageModel->DeleteRoute($PageID);
                   $this->StatusMessage = 'Page unpublished and saved as draft';
-               } elseif ($Status == 'deleted') {
+               } elseif ($Status == 'trash') {
                   $this->PageModel->DeleteRoute($PageID);
                   $this->PageModel->RebuildTree();
-                  $this->StatusMessage = 'Page deleted';
+                  $this->StatusMessage = 'Page moved to the Trash';
                }
                elseif ($Status == 'published') {
                   $this->PageModel->SetRoute($PageID);
@@ -612,7 +612,7 @@ class EditController extends Gdn_Controller {
             $this->PageModel->Delete($PageID);
          } else {
             $this->PageModel->Delete();
-            $this->RedirectUrl = Url('/edit/pages/deleted');
+            $this->RedirectUrl = Url('/edit/pages/trash');
          }
       }
 

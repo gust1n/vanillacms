@@ -15,7 +15,7 @@ $Session = Gdn::Session(); ?>
       <li class="All<?php echo $this->Filter == 'all' ? ' Active' : ''; ?>"><?php echo Anchor(T('All '.Wrap($this->UnpublishedCount + $this->PublishedCount)), 'edit/pages/all'); ?></li>
       <li class="Published<?php echo $this->Filter == 'published' ? ' Active' : ''; ?>"><?php echo Anchor(T('Published '.Wrap($this->PublishedCount)), 'edit/pages/published'); ?></li>
       <li class="Drafts<?php echo $this->Filter == 'draft' ? ' Active' : ''; ?>"><?php echo Anchor(T('Drafts '.Wrap($this->UnpublishedCount)), 'edit/pages/draft'); ?></li>
-      <li class="Deleted<?php echo $this->Filter == 'deleted' ? ' Active' : ''; ?>"><?php echo Anchor(T('Trash '.Wrap($this->DeletedCount)), 'edit/pages/deleted', array('class' => 'DeletedTab')); ?></li>
+      <li class="Trash<?php echo $this->Filter == 'trash' ? ' Active' : ''; ?>"><?php echo Anchor(T('Trash '.Wrap($this->TrashCount)), 'edit/pages/trash', array('class' => 'TrashTab')); ?></li>
    </ul>
 </div>
 <?php 

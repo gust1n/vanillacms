@@ -14,7 +14,7 @@ foreach ($this->AllPages->Result() as $Page) {
       echo '<td class="Buttons">'
       .Anchor(T('Edit'), '/edit/'.$Page->PageID, 'SmallButton EditButton')
       .Anchor( T('Save as Draft'), '/edit/status/'.$Page->PageID.'/draft/'.$Session->TransientKey(), 'SmallButton Draft StatusMessage')
-      .Anchor( T('Delete'), '/edit/status/'.$Page->PageID.'/deleted/'.$Session->TransientKey(), 'SmallButton DeleteMessage')
+      .Anchor( T('Trash'), '/edit/status/'.$Page->PageID.'/trash/'.$Session->TransientKey(), 'SmallButton DeleteMessage')
       .'</td>';
       
    echo '</tr>';

@@ -30,10 +30,10 @@ jQuery(document).ready(function($) {
       followConfirm: false,
       afterConfirm: function(json, sender) {
          if (!$(sender).hasClass('EmptyTrash')) {
-            //Increase the deleted count
-            var DeletedCount = $('.DeletedTab span');
-            var num = parseInt($.trim($(DeletedCount).html()));
-            $(DeletedCount).html(++num);
+            //Increase the trash count
+            var TrashCount = $('.TrashTab span');
+            var num = parseInt($.trim($(TrashCount).html()));
+            $(TrashCount).html(++num);
             //Decrease the current count
             var CurrentCount = $('li.Active a span');
             num = parseInt($.trim($(CurrentCount).html()));
