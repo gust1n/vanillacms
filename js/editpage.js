@@ -65,7 +65,7 @@ jQuery(document).ready(function($) {
          }
       });
    }
-     
+   
    //When selecting a Custom Field in the drop-down
    $('#MetaKeySelect').change(function() {  //Show/Hide Assets
       var MetaKey = $('#MetaKeySelect option:selected').val();

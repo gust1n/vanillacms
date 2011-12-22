@@ -1,23 +1,52 @@
 jQuery(document).ready(function($) {
-   
+
    $('a.StatusMessage').popup({
       confirm: true,
       followConfirm: false,
       afterConfirm: function(json, sender) {
-         $(sender).parents('table').toggleClass('draft');       
+         if ($('li.Active').hasClass('All')) {
+            $(sender).parents('table').toggleClass('draft');
+         } else {
+            //Decrease the current count
+            var CurrentCount = $('li.Active a span');
+            var num = parseInt($.trim($(CurrentCount).html()));
+            $(CurrentCount).html(--num);
+            if ($(sender).hasClass('Draft')) {
+               var DraftCount = $('li.Drafts a span');
+               num = parseInt($.trim($(DraftCount).html()));
+               $(DraftCount).html(++num);
+            } else if ($(sender).hasClass('Publish')) {
+               var PublishCount = $('li.Published a span');
+               num = parseInt($.trim($(PublishCount).html()));
+               $(PublishCount).html(++num);
+            }
+            $(sender).parents('tr').remove();
+         }
+
       }
    });
    $('a.DeleteMessage').popup({
       confirm: true,
       followConfirm: false,
       afterConfirm: function(json, sender) {
-         $(sender).parents('tr').remove();
+         if (!$(sender).hasClass('EmptyTrash')) {
+            //Increase the deleted count
+            var DeletedCount = $('.DeletedTab span');
+            var num = parseInt($.trim($(DeletedCount).html()));
+            $(DeletedCount).html(++num);
+            //Decrease the current count
+            var CurrentCount = $('li.Active a span');
+            num = parseInt($.trim($(CurrentCount).html()));
+            $(CurrentCount).html(--num);
+            //Make it look like it was deleted
+            $(sender).parents('tr').remove();
+         }
       }
    });
-   
+
    var ProgressSpinner = $('.Progress');
    ProgressSpinner.hide();
-   
+
    var SortableContainer = $('.Sortable');
 
    //Handles the drag and drop page ordering

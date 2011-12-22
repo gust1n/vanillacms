@@ -601,6 +601,24 @@ class EditController extends Gdn_Controller {
       $this->Render();      
    }
    
+   public function Delete($PageID = '', $TransientKey = FALSE)
+   {
+      $this->Permission('VanillaCMS.Pages.Manage');
+      $this->DeliveryType(DELIVERY_TYPE_BOOL);
+      $Session = Gdn::Session();
+
+      if ($TransientKey !== FALSE && $Session->ValidateTransientKey($TransientKey)) {
+         if (is_numeric($PageID)) {
+            $this->PageModel->Delete($PageID);
+         } else {
+            $this->PageModel->Delete();
+            $this->RedirectUrl = Url('/edit/pages/deleted');
+         }
+      }
+
+      $this->Render();
+   }
+   
    /**
     * Sorting display order of pages.
     * All cred to vanillaforums team!

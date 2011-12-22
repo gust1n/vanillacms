@@ -403,6 +403,24 @@ class PageModel extends Gdn_Model {
 	   }  
 	   return false;
 	}
+	
+	/**
+    * Deletes either single page or all trashed pages
+    *
+    * @param int $PageID Selected page
+    * @param string $Status Status to be set, eg 'draft' or published
+    * @return none
+    * @author Jocke Gustin
+    */
+	public function Delete($PageID = null)
+	{	      
+	   if (isset($PageID) && is_numeric($PageID)) { //Deleting a single page
+	      $this->SQL->Delete('Page', array('PageID' => $PageID));
+	   } else { //Emtying trash
+	      $this->SQL->Delete('Page', array('Status' => 'deleted'));
+	   }
+	   return TRUE;
+	}
 		
    /**
     * Autosets the route to ex /hello/world instead of /page/hello/world

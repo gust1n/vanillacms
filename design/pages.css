@@ -1,3 +1,4 @@
+table.Pages strong{display:block}
 table.draft {border-color:#ccc;background:#eee}
 table.draft td{background:#eee}
 table.deleted {border-color:#999;background:#FDA9A3}
