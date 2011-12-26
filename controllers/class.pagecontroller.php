@@ -77,14 +77,20 @@ class PageController extends VanillaCMSController {
                               
             }
             //or else we have these special ones
-            if ($PageMeta->MetaKey == 'MetaDescription') {
+            if ($PageMeta->MetaKey == 'MetaDescriptionModule') {
                $this->Head->AddTag('meta', array('name' => 'description', 'content'=>$PageMeta->MetaValue));
             }
-            if ($PageMeta->MetaKey == 'MetaKeywords') {
+            if ($PageMeta->MetaKey == 'MetaKeywordsModule') {
                $this->Head->AddTag('meta', array('name' => 'keywords', 'content'=>$PageMeta->MetaValue));
             }
-            if ($PageMeta->MetaKey == 'CustomCss') {
+            if ($PageMeta->MetaKey == 'CustomCssModule') {
                $this->CustomCss = $PageMeta->MetaValue;
+            }
+            if ($PageMeta->MetaKey == 'DiscussPageModule') {
+               $this->AddAsset('Panel', '<h3><a href="#DiscussThis" class="LargeButton mtm">' . T('Discuss this!') . '</a></h3>');
+
+               $DiscussPageModule = new DiscussPageModule($this, $this->Page->PageID);
+               $this->AddAsset('AfterContent', $DiscussPageModule);
             }
             
 

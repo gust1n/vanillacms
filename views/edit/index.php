@@ -84,11 +84,6 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
          <tr>
             <td style="vertical-align:middle" id="NewMetaLeft" class="Left">
                <select style="margin-right:5px" id="MetaKeySelect" name="MetaKeySelect">
-                  <optgroup label="<?php echo T('Extra Info'); ?>"><?php
-                     foreach ($this->AvailableMetaKeys as $Key => $Module) {
-                        echo '<option value="'.$Key.'">'.$Module['Name'].'</option>';                        
-                     } ?>
-                  </optgroup>
                   <optgroup label="<?php echo T('CMS Modules'); ?>"><?php   
                      foreach ($this->VanillaCMSModules as $key => $Module) {
                         echo '<option class="ShowAsset" value="'.$key.'">'.$Module['Name'].'</option>';

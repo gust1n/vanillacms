@@ -1,5 +1,13 @@
 <?php if (!defined('APPLICATION')) exit();
 
+$ModuleInfo['DiscussPageModule'] = array(
+	'Name' => 'Page Discussion',
+   'Description' => "Allows Page Comments",
+   'HelpText' => "None",
+   'ContentType' => "none",
+   'ShowAssets' => false,
+   'Author' => "Jocke Gustin"
+);
 /**
  * Renders the discussion part of each page
  */

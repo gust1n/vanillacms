@@ -111,7 +111,7 @@ jQuery(document).ready(function($) {
 
       $(ResponseContainer).empty();
 
-      if ($('#MetaKeySelect option:selected').hasClass('ShowAsset')) {
+      if (modulesInfo[MetaKey].ShowAssets === "true") {
          MetaAsset = $('#MetaAssetSelect option:selected').val();
          MetaAssetName = $('#MetaAssetSelect option:selected').html();
       }
@@ -156,12 +156,13 @@ jQuery(document).ready(function($) {
    });
 
    //When clicking on the edit button
+   /*
    $('a.EditMeta').live('click', function() {
       var MetaArray = $(this).next('input').val().split('|');
       $('#MetaValue').val(MetaArray[2]);
       $('#MetaKeySelect option[value='+MetaArray[0]+']').attr('selected', 'selected');
 
-      if ($('#MetaKeySelect option:selected').hasClass('ShowAsset')) {
+      if ($('#MetaKeySelect option:selected').hasClass('ShowAssets')) {
          $('.AssetShowHide').show();
          $('#MetaAssetSelect option[value='+MetaArray[3]+']').attr('selected', 'selected');
       } else {
@@ -171,6 +172,7 @@ jQuery(document).ready(function($) {
       $('#NewMeta').effect("highlight", {}, 2700);
       return false;
    });
+   */
 
    //When clicking on the delete button, first confirm, then delete.
    $('a.DeleteMeta').popup({

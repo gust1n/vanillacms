@@ -213,10 +213,7 @@ class EditController extends Gdn_Controller {
       /*END OF AuthenticatedPostBack function*/
             
       $this->AvailableParents = $this->PageModel->Get(array('Exclude' => $this->Page->PageID)); //Exclude own page   
-      
-      //Render array with available meta keys
-      $this->AvailableMetaKeys = $this->_AvailableMetaKeys();
-      
+            
       //Render array with available modules
       $this->VanillaCMSModules = $this->_AvailableModules();
       $this->DashboardModules = C('VanillaCMS.DashboardModules');
@@ -299,44 +296,10 @@ class EditController extends Gdn_Controller {
          return $AvailableTemplates;
    }
    
-   /**
-    * Returns available meta info fields for Custom Fields
-    *
-    * @todo Render dynamically instead of this crappy hard-coded solution
-    */
-   private function _AvailableMetaKeys()
-   {
-      /*
-         TODO Render dynamically
-      */
-      return array(
-      'MetaDescription' => array(
-                           'Name' => T('Meta Description'),
-                           'Description' => 'Short description of page, for SEO',
-                           'HelpText' => 'Description',
-                           'ShowAssets' => false,
-                           'ContentType' => 'textarea'
-                           ),
-      'MetaKeywords' =>    array(
-                              'Name' => T('Meta Keywords'),
-                              'Description' => 'Keywords related to the page, for SEO',
-                              'HelpText' => 'Keywords sepratated by , (comma)',
-                              'ShowAssets' => false,
-                              'ContentType' => 'text'
-                              ),
-      'CustomCss' =>    array(
-                              'Name' => T('Custom CSS'),
-                              'Description' => 'Page-specific CSS',
-                              'HelpText' => 'Enter CSS',
-                              'ShowAssets' => false,
-                              'ContentType' => 'textarea'
-                              ), 
-      );
-      
-   }
-   
    private function _AvailableModules() {
       $AvailableModules = array();
+      
+      //$ExcludedModules = array('DiscussPageModule');
 
       $Info = array();
       if ($FolderHandle = opendir(PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'modules')) {
@@ -349,40 +312,29 @@ class EditController extends Gdn_Controller {
                continue;        
 
             $ModuleFile = PATH_APPLICATIONS . DS . 'vanillacms' . DS . 'modules' . DS . $Item;
-            $ModuleName = $this->_ScanModule($ModuleFile);
-
-            $Name = substr($Item,6,-4 );
-            //$AvailableModules = array();
-
-            //T(substr($Name,0,-6));
             
             $UpdateModel = new UpdateModel;
             $InfoArray = $UpdateModel->ParseInfoArray($ModuleFile, 'ModuleInfo');
-            
-            $AvailableModules[$ModuleName] = $InfoArray[$ModuleName];            
+            if (in_array(key($InfoArray), $ExcludedModules)) {
+               continue;
+            }
+            $AvailableModules[key($InfoArray)] = $InfoArray[key($InfoArray)];            
          }
          closedir($FolderHandle);
       }
-      
-      unset($AvailableModules['HeaderModule']);
-      unset($AvailableModules['FooterModule']);
-      unset($AvailableModules['ShareModule']);
-      unset($AvailableModules['DiscussPageModule']);
-      
+            
       return $AvailableModules;
    }
    
    public function AvailableModules($Output = 'json')
    {
       $this->Permission('VanillaCMS.Pages.Manage');
-      
-      
-      $AvailableMetaKeys = self::_AvailableMetaKeys();
+
       $VanillaCMSModules = self::_AvailableModules();
       $DashboardModules = C('VanillaCMS.DashboardModules');
       $VanillaModules = C('VanillaCMS.VanillaModules');
       
-      $AllModules = $AvailableMetaKeys + $VanillaCMSModules + $DashboardModules + $VanillaModules;
+      $AllModules = $VanillaCMSModules + $DashboardModules + $VanillaModules;
       
       if ($Output == 'json') {
          $this->DeliveryType(DELIVERY_TYPE_BOOL);
@@ -393,24 +345,6 @@ class EditController extends Gdn_Controller {
       }
       
       $this->Render();
-   }
-   
-   private function _ScanModule($ModuleFile) {
-      // Find the $PluginInfo array
-      $Lines = file($ModuleFile);
-
-      foreach ($Lines as $Line) {
-
-         if (strtolower(substr(trim($Line), 0, 6)) == 'class ') {
-            $Parts = explode(' ', $Line);
-            //if (count($Parts) > 2)
-            $ClassName = $Parts[1];
-            break;
-         }
-
-      }
-      unset($Lines);      
-      return $ClassName;
    }
    
    /**
