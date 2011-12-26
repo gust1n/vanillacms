@@ -256,7 +256,7 @@ jQuery(document).ready(function($) {
                } else {
                   gdn.inform(json);
                   if (json.InformMessages) {
-                     $('span.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
+                     $('.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
                   };
                }
 

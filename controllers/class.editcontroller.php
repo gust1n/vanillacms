@@ -181,9 +181,6 @@ class EditController extends Gdn_Controller {
             //Set PageID for outputting if new page
             $this->SetJson('PageID', $PageID);
             
-            /*
-               TODO This does not work properly
-            */
             if (!$this->SavedPage->DateUpdated) { //Never been updated = new page
                $NewActivityID = $this->ActivityModel->Add(
                   Gdn::Session()->UserID,

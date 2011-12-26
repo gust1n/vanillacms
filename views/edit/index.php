@@ -140,8 +140,8 @@ else {
 	$ButtonText = T('Update');	
 }
 
-$ToPanel .= T('Status').': <span class="Publish Status">' . $Status . '</span><div class="clear"></div>';
-$ToPanel .= T('Last Upated').': <span class="Publish Time">' . $Time . '</span><div class="clear"></div>';
+$ToPanel .= T('Status').': <strong class="Publish Status">' . $Status . '</strong><div class="clear"></div>';
+$ToPanel .= T('Last Upated').': <strong class="Publish Time">' . $Time . '</strong><div class="clear"></div>';
 //$ToPanel .= $this->Form->Button('Save Draft', array('class' => 'Button Draft', 'type' => 'submit'));
 //$ToPanel .= '<input type="submit" id="Form_SaveDraft" name="trash" value="'.T('Trash').'" class="Button Trash" />';
 $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="draft" value="'.T('Save as Draft').'" class="Button Draft" />';

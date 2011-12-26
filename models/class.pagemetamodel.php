@@ -7,33 +7,6 @@ class PageMetaModel extends Gdn_Model {
 	}
 	
 	/**
-	 * Adds meta information to pages
-	 *
-	 * @param int $PageID Selected page
-	 * @param string $Meta Array of all information to be saved 
-	 * @return none
-	 * @author Jocke Gustin
-	 */
-	public function AddPageMeta($PageID, $Meta)
-	{
-	   foreach ($Meta as $PageMeta) {
-            $this->SQL->Insert('PageMeta', array('PageID' => $PageID, 'MetaKey' => $PageMeta['MetaKey'],'MetaKeyName' => $PageMeta['MetaKeyName'], 'MetaValue' => $PageMeta['MetaValue'], 'MetaAsset' => $PageMeta['MetaAsset'], 'MetaAssetName' => $PageMeta['MetaAssetName']));
-      }
-	}
-	
-	/**
-	 * Removes all page meta from selected page. Do this before adding every time
-	 *
-	 * @param int $PageID Selected page
-	 * @return none
-	 * @author Jocke Gustin
-	 */
-	public function ClearPageMeta($PageID)
-	{
-	   $this->SQL->Delete('PageMeta', array('PageID' => $PageID));
-	}
-	
-	/**
 	 * Deletes PageMeta by ID
 	 *
 	 * @param int $PageMetaID the ID to delete

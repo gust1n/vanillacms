@@ -110,6 +110,9 @@ class PageController extends VanillaCMSController {
             $this->AddModule($ShareModule);
          }
          
+         /*
+            TODO AllowDiscussion should be removed, is already replaced by module
+         */
          //Discussion
          if ($this->Page->AllowDiscussion == 1) {
             $this->AddJSFile('plugins/Voting/voting.js');
