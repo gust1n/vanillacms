@@ -2,28 +2,11 @@
 $Session = Gdn::Session();
 
 setcookie("admin", "1", time()+3600, '/');
-if (is_object($this->Page)) {
-	$HeaderText = T('Edit') . ': ' . $this->Page->Name;
-	//echo '<style type="text/css">.PromtText{display:none}</style>';	
-} else {
-   $HeaderText = T('Add '. $this->Type);
-   //echo "<script type='text/javascript'>jQuery(document).ready(function($) { $('#Form_Permission').attr('checked', true); });</script>";
-}
-/*
-   TODO Move to Controller
-*/
-$IsCoreTemplate = false;
-if (array_key_exists($this->Page->Template, C('VanillaCMS.CoreTemplates'))) {
-   $IsCoreTemplate = true;
-   echo '<input type="hidden" id="IsCoreTemplate" value="true" />';
-} else {
-   echo '<input type="hidden" id="IsCoreTemplate" value="false" />';
-}
 ?>
-<h1 id="MainHeader"><?php echo $HeaderText; ?></h1>
+<h1 id="MainHeader"><?php echo $this->HeaderText; ?></h1>
 
 <?php
-echo '<div id="MainContent"><label id="NamePromtText" class="PromtText" for="Form_Name">'.T('Enter page name...').'</label><div style="width:100%;height:50px">';
+echo '<div id="MainContent"><div style="width:100%;height:50px">';
 $value = T('Enter page name.....');
 if ($this->Page->Name) {
    $value = $this->Page->Name;
@@ -43,7 +26,7 @@ $UrlCodeExploded = explode('/', $this->Page->UrlCode);
 $ThisUrlCode = $UrlCodeExploded[count($UrlCodeExploded) - 1];
 $ParentUrlCode = substr($this->Page->UrlCode, 0, -strlen($ThisUrlCode));
 
-if ($IsCoreTemplate) {
+if ($this->IsCoreTemplate) {
    echo Wrap($this->Page->UrlCode, 'span', array('id' => 'ParentUrlCode'));
    echo Wrap('', 'span', array('id' => 'UrlCode'));
 } else {

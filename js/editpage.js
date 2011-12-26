@@ -308,7 +308,7 @@ jQuery(document).ready(function($) {
 
    // When setting page-title, autogenerate UrlCode
    $("#Form_Name").keyup(function(event) {
-      if ($('#Form_CodeIsDefined').val() === '0' && $('#IsCoreTemplate').val() === 'false') {
+      if ($('#Form_CodeIsDefined').val() === '0' && $('#Form_IsCoreTemplate').val() === '0') {
          $('#UrlCodeContainer').show();
          var val = $(this).alphanumeric({allow:"-"}).val().replace(/[^a-z0-9\-]+/gi,'').toLowerCase();
          $("#Form_UrlCode").val(val);
@@ -370,10 +370,10 @@ jQuery(document).ready(function($) {
          $('#UrlCode').hide();
          $('.EditUrlCode').hide();
          $('.ParentNotOptional').hide();
-         $('#IsCoreTemplate').val('true');
+         $('#Form_IsCoreTemplate').val('1');
          $('#ParentUrlCode').html(Template.val());
       } else {
-         $('#IsCoreTemplate').val('false');
+         $('#Form_IsCoreTemplate').val('0');
          $('#Form_UrlCode').val($('#Form_Name').val().replace(/[ ]+/g, '-').replace(/[^a-z0-9\-]+/gi,'').toLowerCase());
          $('#UrlCode').html($('#Form_Name').val().replace(/[ ]+/g, '-').replace(/[^a-z0-9\-]+/gi,'').toLowerCase());
          $('#UrlCode').show();
@@ -405,7 +405,7 @@ jQuery(document).ready(function($) {
    }
    
    //If is a core template, hide all field that should be non-available
-   if ($('#IsCoreTemplate').val() === "true") {
+   if ($('#Form_IsCoreTemplate').val() === "1") {
       $('.ParentNotOptional, .EditUrlCode, #UrlCode').hide();
       
    }

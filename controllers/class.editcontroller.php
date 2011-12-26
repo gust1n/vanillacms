@@ -96,17 +96,27 @@ class EditController extends Gdn_Controller {
       $this->AddJsFile('editpage.js');
 
       $this->Page = FALSE;
+      $this->IsCoreTemplate = FALSE;
+      $this->HeaderText = T('Add '. $Type);
 
       // Set the model on the form.
       $this->Form->SetModel($this->PageModel);
+      
+      $this->Form->AddHidden('IsCoreTemplate', '0');
 
       // If were not adding, but editing an existing page
       if (is_numeric($PageID) && $PageID > 0) { 
          if ($this->Page = $this->PageModel->Get(array('PageID' => $PageID))) { //If page exists
             
             $this->Title(T('Edit Page'));
+            $this->HeaderText = T('Edit') . ': ' . $this->Page->Name;
             $this->Form->AddHidden('PageID', $this->Page->PageID);
             $this->Form->AddHidden('CodeIsDefined', '1'); //For the urlcode autofunction
+            
+            if (array_key_exists($this->Page->Template, C('VanillaCMS.CoreTemplates'))) {
+               $this->IsCoreTemplate = TRUE;
+               $this->Form->AddHidden('IsCoreTemplate', '1');
+            }
             
          } else {
             Redirect('dashboard/home/filenotfound');
@@ -143,41 +153,13 @@ class EditController extends Gdn_Controller {
             $this->PageModel->RebuildTree();
             
             $this->SavedPage = $this->PageModel->Get(array('PageID' => $PageID));
-            
-            /*
-               TODO Fix ajax-updating when editing instead of this crappy solution
-            */
-            //PAGEMETA
-            /*
-            $this->PageMetaModel->ClearPageMeta($PageID);
-                        if ($MetaArray = $this->Form->GetFormValue('MetaKey')) {
-                           foreach ($MetaArray as $Key => $Meta) {
-                              $ExplodedMeta = explode('|', $Meta);
-                              $SingleMeta = array();
-                              $SingleMeta['MetaKey'] = $ExplodedMeta[0];
-                              $SingleMeta['MetaKeyName'] = $ExplodedMeta[1];
-                              $SingleMeta['MetaValue'] = $ExplodedMeta[2];
-                              $SingleMeta['MetaAsset'] = $ExplodedMeta[3];
-                              $SingleMeta['MetaAssetName'] = $ExplodedMeta[4];
-                              
-                              //echo $SingleMeta['MetaValue'];
-                               
-                              $NewArray[$ExplodedMeta[0]] = $SingleMeta;
-                           }
-                        }
-                        if (isset($NewArray)) {
-                           $this->PageModel->AddPageMeta($PageID, $NewArray);
-                        }*/
-            
-            
+                        
             //ROUTES
             if (isset($this->SavedPage->RouteIndex))
                $this->PageModel->DeleteRoute($PageID); //Always delete route in case UrlCode is changed
                
              $this->PageModel->SetRoute($PageID); //Auto set route to get rid of /page prefix
-
-            
-            
+         
             /*
             //PERMISSIONS
             $PermissionModel = Gdn::PermissionModel();

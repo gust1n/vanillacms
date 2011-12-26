@@ -93,11 +93,6 @@ label {
     color:#ccc;
     font-weight:normal;
 }
-#NamePromtText {
-  font-size:22px;
-  padding:2px 0 2px 4px;
-  display:none;
-}
 #ParentOnly {
   float:right;
   font-weight:none;
