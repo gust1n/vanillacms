@@ -119,4 +119,10 @@ $Configuration['VanillaCMS']['VanillaModules'] = array(
                                                                         'ApplicationFolder' => 'vanilla',
                                                                         'GetData' => 1
                                                    )
-                                                   );                           
+                                                   );
+$Configuration['VanillaCMS']['CoreAssets'] = array(
+                                    'Panel' => 'Sidebar',
+                                    'Content' => 'Page Content',
+                                    'AfterContent' => 'Below Page Content',
+                                    'Foot' => 'Footer'
+                                    );         

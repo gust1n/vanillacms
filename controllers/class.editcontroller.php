@@ -414,22 +414,24 @@ class EditController extends Gdn_Controller {
    }
    
    /**
-    * Returns available assets for placing stuff in
-    *
-    * @todo Render dynamically instead of this crappy hard-coded solution
+    * Returns available assets for placing modules in. Retrieves it from ThemeInfo Array in themes about.php
+    * The info array should hold structure: 'Assets' => array('AssetCallName' => 'AssetNiceName', 'AssetCallName2' => 'AssetNiceName2')
+    * 
     */
    private function _AvailableAssets()
    {
+      $AvailableAssets = array();
+      $ThemeInfo = Gdn::ThemeManager()->EnabledThemeInfo(TRUE);
+      $AssetsArray = $ThemeInfo['Assets'];
+      foreach ($AssetsArray as $Key => $Name) {
+         $AvailableAssets[$Key] = $Name;
+      }
 
-      return array(
-         'FullWidth' => T('Full Width'),
-         'Content' => T('Content'),
-         'AfterContent' => T('After Content'),
-         'Panel' => T('Panel'),
-         'Box1' => T('Box1'),
-         'Box2' => T('Box2'),
-         'Box3' => T('Box3')  
-      );
+      if (count($AvailableAssets) > 0) {
+         return $AvailableAssets;
+      } else {
+         return C('VanillaCMS.CoreAssets');
+      }
    }
    
    /**
