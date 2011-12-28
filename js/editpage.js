@@ -115,7 +115,7 @@ jQuery(document).ready(function($) {
          MetaAsset = $('#MetaAssetSelect option:selected').val();
          MetaAssetName = $('#MetaAssetSelect option:selected').html();
       }
-      var MetaValue = $('#MetaValue').val().trim();
+      var MetaValue = $.trim($('#MetaValue').val());
 
       postValues = 'MetaKey=' + MetaKey + '&MetaKeyName=' + MetaKeyName + '&PageID=' + PageID + '&MetaAsset=' + MetaAsset + '&MetaAssetName=' + MetaAssetName + '&MetaValue=' + MetaValue;
       postValues += '&TransientKey=' + gdn.definition('TransientKey') + '&hpt=';
@@ -257,7 +257,7 @@ jQuery(document).ready(function($) {
                   gdn.inform(json);
                   if (json.InformMessages) {
                      $('.Publish.Time').html(json.InformMessages['0']['Message'].substr(-7, 7));
-                  };
+                  }
                }
 
                if ($('#Form_PageID').length === 0) {
