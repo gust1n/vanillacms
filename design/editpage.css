@@ -7,6 +7,14 @@ div#UrlCodeContainer a{margin-left:5px;}
 #UrlCode{background:#ffd;padding:3px 5px;}
 input.UrlCode{background:none;border:0;font-size:14px;width:60%;clear:right;}
 #Panel2{float:right;width:250px;}
+table#NewMeta{height:110px}
+.ic_16{display:inline-block;height:16px;width:16px;position:relative;text-indent:-999em}
+.ic_16:hover{background-color:#ddd;}
+.ic_edit{background:url('images/ic_edit.png') no-repeat}
+.ic_delete{background:url('images/ic_delete.png') no-repeat}
+.HoverToggle{display:none;margin-left:10px}
+#TheList tr:hover .HoverToggle{display:inline}
+a#NewMetaSubmit{position: relative;top: 15px;}
 .Box input.Draft{background:#ddd;color:#000;text-shadow:none;border-color:black;}
 .Box input.SaveButton{float:right}
 #Panel2 div.Box.Info input.Button{margin-top:5px;}

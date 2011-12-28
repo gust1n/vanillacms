@@ -67,10 +67,12 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
    <table id="NewMeta">
       <thead>
          <tr>
-            <th style="width:45%">
+            <th style="width:20%">
                <label style="width:150px" for="MetaKeySelect">
                   <?php echo T('Name');?>
                </label>
+            </th>
+            <th style="width:20%">
                <label style="width:70px" class="AssetShowHide" for="MetaAssetSelect">
                   <?php echo T('Asset');?>
                </label>
@@ -82,7 +84,7 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
       </thead>
       <tbody>
          <tr>
-            <td style="vertical-align:middle" id="NewMetaLeft" class="Left">
+            <td>
                <select style="margin-right:5px" id="MetaKeySelect" name="MetaKeySelect">
                   <optgroup label="<?php echo T('CMS Modules'); ?>"><?php   
                      foreach ($this->VanillaCMSModules as $key => $Module) {
@@ -100,6 +102,9 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
                      } ?>  
                   </optgroup>
                </select>
+               <a class="Button" id="NewMetaSubmit"><?php echo T('Add');?></a>
+            </td>
+            <td>
                <select class="AssetShowHide" id="MetaAssetSelect"><?php
                   foreach ($this->AvailableAssets as $Key => $Value) {
                      echo '<option value="'.$Key.'">'.$Value.'</option>';
@@ -107,7 +112,6 @@ echo $this->Form->TextBox('Body', array('MultiLine' => TRUE, 'class' => 'Editor'
                   
                </select>
                <div style="width:100%;height:14px">&nbsp;</div>
-               <a class="Button" id="NewMetaSubmit"><?php echo T('Add');?></a>
             </td>
             <td>
                <textarea id="MetaValue" style="width:99%" name="MetaValue" rows="4" cols="25" tabindex="8"></textarea>

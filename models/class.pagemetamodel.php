@@ -27,16 +27,16 @@ class PageMetaModel extends Gdn_Model {
 	 * @return object SQL results.
 	 * @author Jocke Gustin
 	 */
-	public function Get($PageID, $MetaKey = '')
+	public function Get($PageID, $PageMetaID = '')
 	{
-	   if ($MetaKey) {
+	   if ($PageMetaID) {
 	      return $this->SQL
             ->Select('pm.*')
-            ->Where('pm.PageID', $PageID)
-            ->Where('pm.MetaKey', $MetaKey)
+            //->Where('pm.PageID', $PageID)
+            ->Where('pm.PageMetaID', $PageMetaID)
             ->From('PageMeta pm')
-            ->Get()
-            ->FirstRow();
+            ->Get();
+            //->FirstRow();
 	   } else {
 	      return $this->SQL
             ->Select('pm.*')

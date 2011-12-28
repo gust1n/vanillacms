@@ -36,8 +36,9 @@ jQuery(document).ready(function($) {
                } else {
                   $.each(json.PageMeta, function(key, val) {
                      $('#TheList').prepend(
-                        '<tr id=\"' + val.PageMetaID + '\"><td>' + val.MetaKeyName + '<input type=\"hidden\" id=\"MetaKey\" value=\"' + val.MetaKey + '\" >' +
-                        '<a href=\"' + gdn.definition('WebRoot') + '/edit/deletemeta\" class=\"DeleteMeta\">[X]</a></td><td>' + val.MetaAssetName +
+                        '<tr id=\"' + val.PageMetaID + '\"><td>' + val.MetaKeyName +
+                        '<span class="HoverToggle"><a href=\"#NewMeta\" class=\"EditMeta ic_16 ic_edit\">[EDIT]</a>' +
+                        '<a href=\"' + gdn.definition('WebRoot') + '/edit/deletemeta\" class=\"DeleteMeta ic_16 ic_delete\">[X]</a></span></td><td>' + val.MetaAssetName +
                         '</td><td>' + val.MetaValue + '</td></tr>');
                      });
                      if (json.PageMeta.length === 0) {
@@ -108,6 +109,7 @@ jQuery(document).ready(function($) {
       var PageID = $('#Form_PageID').val();
       var MetaAsset = '';
       var MetaAssetName = '';
+      var PageMetaID = '';
 
       $(ResponseContainer).empty();
 
@@ -116,8 +118,11 @@ jQuery(document).ready(function($) {
          MetaAssetName = $('#MetaAssetSelect option:selected').html();
       }
       var MetaValue = $.trim($('#MetaValue').val());
+      if ($('#PageMetaID').length !== 0) {
+         PageMetaID = $('#PageMetaID').val();
+      }
 
-      postValues = 'MetaKey=' + MetaKey + '&MetaKeyName=' + MetaKeyName + '&PageID=' + PageID + '&MetaAsset=' + MetaAsset + '&MetaAssetName=' + MetaAssetName + '&MetaValue=' + MetaValue;
+      postValues = 'PageMetaID=' + PageMetaID + '&MetaKey=' + MetaKey + '&MetaKeyName=' + MetaKeyName + '&PageID=' + PageID + '&MetaAsset=' + MetaAsset + '&MetaAssetName=' + MetaAssetName + '&MetaValue=' + MetaValue;
       postValues += '&TransientKey=' + gdn.definition('TransientKey') + '&hpt=';
 
       $.ajax({
@@ -136,6 +141,7 @@ jQuery(document).ready(function($) {
                $(ResponseContainer).prepend(json.ErrorMessages);
                json.ErrorMessages = null;
             } else {
+               $('#PageMetaID').remove(); //Remove the current ID for not overwriting with new
                $('#MetaValue').empty();
                $('#MetaValue').val('');
                GetPageMeta(); //Fetch new PageMeta
@@ -156,23 +162,63 @@ jQuery(document).ready(function($) {
    });
 
    //When clicking on the edit button
-   /*
    $('a.EditMeta').live('click', function() {
-      var MetaArray = $(this).next('input').val().split('|');
-      $('#MetaValue').val(MetaArray[2]);
-      $('#MetaKeySelect option[value='+MetaArray[0]+']').attr('selected', 'selected');
+      var PageMetaID = $(this).parents('tr').attr('id');
+      var PageID = $('#Form_PageID').val();
+      var postValues = 'PageID=' + PageID + '&PageMetaID=' + PageMetaID + '&TransientKey=' + gdn.definition('TransientKey');
+      var action = gdn.definition('WebRoot') + '/edit/getpagemeta/';
 
-      if ($('#MetaKeySelect option:selected').hasClass('ShowAssets')) {
-         $('.AssetShowHide').show();
-         $('#MetaAssetSelect option[value='+MetaArray[3]+']').attr('selected', 'selected');
-      } else {
-         $('.AssetShowHide').hide();
-      }
+      $.ajax({
+         type: "POST",
+         url: action,
+         data: postValues,
+         dataType: 'json',
+         error: function(XMLHttpRequest, textStatus, errorThrown) {
+            $('div.Popup').remove();
+            $.popup({}, XMLHttpRequest.responseText);
+         },   
+         success: function(json) {
+            json = $.postParseJson(json);
+
+            if (json.ErrorMessages) {
+               $('.PostMeta h2').after('<div class="Messages Errors"><ul><li>' + json.ErrorMessages + '</li></ul></div>');
+               json.ErrorMessages = null;
+            } else {
+               $.each(json.PageMeta, function(key, val) {
+                  $('#MetaKeySelect option[value='+val.MetaKey+']').attr('selected', 'selected');
+                  $('#MetaKeySelect').after('<input type="hidden" id="PageMetaID" value="'+val.PageMetaID+'">');
+                  if (modulesInfo[val.MetaKey].ShowAssets === "true") {
+                     $('.AssetShowHide').show();
+                     $('#MetaAssetSelect option[value='+val.MetaAsset+']').attr('selected', 'selected');
+                  } else {
+                     $('.AssetShowHide').hide();
+                  }
+                  if (modulesInfo[val.MetaKey].ContentType === "none") {
+                     $('#MetaValueLabel').hide();
+                     $('#MetaValue').hide();
+                  } else if (modulesInfo[val.MetaKey].ContentType === "text") {
+                     $('#MetaValueLabel').show();
+                     $('#MetaValue').replaceWith('<input class="text" type="text" id="MetaValue" name="MetaValue" />');
+                  } else if (modulesInfo[val.MetaKey].ContentType === "textarea") {
+                     $('#MetaValueLabel').show();
+                     $('#MetaValue').replaceWith('<textarea id="MetaValue" style="width: 99%; overflow-x: hidden; overflow-y: hidden; display: block; " name="MetaValue" rows="4" cols="25" tabindex="8"></textarea>');
+                  } else {
+                     $('#MetaValueLabel').show();
+                     $('#MetaValue').show();
+                  }
+                  $('#MetaValue').val(val.MetaValue);
+                  $('#NewMeta').effect("highlight", {}, 2700);
+               });
+               $('#MetaList').effect("highlight", {}, 2700);
+            }
+            gdn.inform(json);
+         },
+         complete: function(XMLHttpRequest, textStatus) {
+            $('span.Progress').remove();
+         }
+      });
       $(this).parents('tr').remove();
-      $('#NewMeta').effect("highlight", {}, 2700);
-      return false;
    });
-   */
 
    //When clicking on the delete button, first confirm, then delete.
    $('a.DeleteMeta').popup({
@@ -409,12 +455,11 @@ jQuery(document).ready(function($) {
    //If is a core template, hide all field that should be non-available
    if ($('#Form_IsCoreTemplate').val() === "1") {
       $('.ParentNotOptional, .EditUrlCode, #UrlCode').hide();
-      
    }
-   
+
    //Get the ModulesInfo array
    GetModulesInfo();
-   
+
    //When submitting the form, handle via above function
    $('#Form_Page :submit').handlePageForm();
    

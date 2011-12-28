@@ -377,6 +377,7 @@ class EditController extends Gdn_Controller {
       $this->SetHeader('Content-Type', 'application/json');
       
       $TransientKey = GetIncomingValue('TransientKey', '');
+      $PageMetaID = GetIncomingValue('PageMetaID');
       $PageID = GetIncomingValue('PageID', '');
       $MetaKey = GetIncomingValue('MetaKey', '');
       $MetaKeyName = GetIncomingValue('MetaKeyName', '');
@@ -384,11 +385,8 @@ class EditController extends Gdn_Controller {
       $MetaAsset = GetIncomingValue('MetaAsset', '');
       $MetaAssetName = GetIncomingValue('MetaAssetName', '');
       
-      $InfoArray = GetIncomingValue('InfoArray', '');
       $InfoArray = self::AvailableModules('echo');
-      
-
-      
+            
       $ApplicationFolder = 'vanillacms';
       if ($InfoArray[$MetaKey]['ApplicationFolder']) {
          $ApplicationFolder = $InfoArray[$MetaKey]['ApplicationFolder'];
@@ -415,6 +413,10 @@ class EditController extends Gdn_Controller {
          'ConfigSetting' => $ConfigSetting,
       );
       
+      if ($PageMetaID) { //If updating
+          $PageMeta['PageMetaID'] = $PageMetaID;
+      }
+      
       $PageID = $this->PageMetaModel->Save($PageMeta);
       
       // if ($PageID) {
@@ -433,15 +435,17 @@ class EditController extends Gdn_Controller {
     *
     * @author Jocke Gustin
     **/
-   public function GetPageMeta($PageID = '') {
+   public function GetPageMeta() {
       $this->Permission('VanillaCMS.Pages.Manage');
       $this->DeliveryType(DELIVERY_TYPE_BOOL);
       $this->DeliveryMethod(DELIVERY_METHOD_JSON);
+      $this->SetHeader('Content-Type', 'application/json');
       
       $PageID = GetIncomingValue('PageID', '');
-      $this->SetHeader('Content-Type', 'application/json');
+      $PageMetaID = GetIncomingValue('PageMetaID', '');
+      
       if ($PageID) {
-         if ($PageMeta = $this->PageMetaModel->Get($PageID)) {
+         if ($PageMeta = $this->PageMetaModel->Get($PageID, $PageMetaID)) {
             $this->SetJson('PageMeta', $PageMeta->Result());
          } else {
             $this->ErrorMessage(T('There was a problem retrieving your Custom Fields'));
