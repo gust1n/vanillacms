@@ -491,7 +491,7 @@ class EditController extends Gdn_Controller {
     * @return void
     * @author Jocke Gustin
     **/
-   public function Status($PageID = '', $Status = 'published', $TransientKey = FALSE) {
+   public function Status($PageID = '', $Status = 'published', $TransientKey = FALSE, $GoToIndex = FALSE) {
       $this->Permission('VanillaCMS.Pages.Manage');
       $this->DeliveryType(DELIVERY_TYPE_BOOL);
       $Session = Gdn::Session();
@@ -516,7 +516,9 @@ class EditController extends Gdn_Controller {
                return FALSE;
                $this->StatusMessege = 'ERROR';
             }
-            	
+            if ($GoToIndex) {
+					Redirect('edit/pages');
+            }
          }	
       }
 

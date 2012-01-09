@@ -144,7 +144,9 @@ else {
 	$ButtonText = T('Update');	
 }
 
-$ToPanel .= T('Status').': <strong class="Publish Status">' . $Status . '</strong><div class="clear"></div>';
+$ToPanel .= T('Status').': <strong class="Publish Status">' . $Status . '</strong>' .
+Anchor( '[X]', '/edit/status/'.$this->Page->PageID.'/trash/'.$Session->TransientKey().'/true', 'ic_16 ic_delete') .
+'<div class="clear"></div>';
 $ToPanel .= T('Last Upated').': <strong class="Publish Time">' . $Time . '</strong><div class="clear"></div>';
 //$ToPanel .= $this->Form->Button('Save Draft', array('class' => 'Button Draft', 'type' => 'submit'));
 //$ToPanel .= '<input type="submit" id="Form_SaveDraft" name="trash" value="'.T('Trash').'" class="Button Trash" />';
