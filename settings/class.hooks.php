@@ -72,41 +72,23 @@ class VanillaCMSHooks implements Gdn_IPlugin {
 
    }
 
-   public function DiscussionModel_BeforeGet_Handler($Sender) { //Hook the PageID into the Discussion model
-      $PageID = GetValue('PageID', $Sender);
-      if (is_numeric($PageID) && $PageID > 0)
-         $Sender->SQL->Where('PageID', $PageID);
+   public function DiscussionModel_AfterDiscussionSummaryQuery_Handler($Sender) { //Makes sure no Page related Discussions/Comments show up in the Forum
+		$Sender->SQL->Where('PageID', null);
+   }
+	public function CommentModel_AfterCommentQuery_Handler($Sender) { //Makes sure no Page related Discussions/Comments show up in the Forum
+		if (!isset($Sender->PageComments)) {
+			$Sender->SQL->Join('Discussion dd', 'c.DiscussionID = dd.DiscussionID', 'left');
+			$Sender->SQL->Where('dd.PageID', null);
+		}
    }
 
-   public function DiscussionController_BeforeCommentBody_Handler($Sender) {
-      $Discussion = GetValue('Object', $Sender->EventArguments);
-      $PageID = GetValue('PageID', $Discussion);
-      if (GetValue('Type', $Sender->EventArguments) == 'Discussion' && is_numeric($PageID) && $PageID > 0) {
-         $Data = Gdn::Database()->SQL()->Select('Name, UrlCode')->From('Page')->Where('PageID', $PageID)->Get()->FirstRow();
-         if ($Data) {
-            echo '<div class="DismissMessage Info">'.sprintf(T('This discussion is related to %s.'), Anchor($Data->Name,$Data->UrlCode)).'</div>';
-         }
-      }
-   }
+	
 
-   public function PostController_Render_Before($Sender) {
-      $Session = Gdn::Session();
-
-      // Pass the PageID (if related to page) to the form
-      $PageID = GetIncomingValue('PageID');
-      if ($PageID > 0 && is_object($Sender->Form))
-         $Sender->Form->AddHidden('PageID', $PageID);
-   }
-
-   // Make sure to use the PageID when saving discussions if present in the url
-   public function DiscussionModel_BeforeSaveDiscussion_Handler($Sender) {
-      $PageID = GetIncomingValue('PageID');
-      if (is_numeric($PageID) && $PageID > 0) {
-         $FormPostValues = GetValue('FormPostValues', $Sender->EventArguments);
-         $FormPostValues['PageID'] = $PageID;
-         $Sender->EventArguments['FormPostValues'] = $FormPostValues;
-      }
-   }
+	public function ActivityModel_BeforeGetComments_Handler($Sender) {
+		echo '<pre>';
+		print_r($Sender->EventArguments);
+		die('</pre>');
+	}
 
    public function Setup() {
       $Database = Gdn::Database();

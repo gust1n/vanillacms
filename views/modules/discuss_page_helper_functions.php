@@ -1,184 +1,153 @@
 <?php if (!defined('APPLICATION')) exit();
 
-function WriteDiscussion($Discussion, &$Sender, &$Session, $Alt) {
-   $CssClass = 'Item';
-   $CssClass .= $Discussion->Bookmarked == '1' ? ' Bookmarked' : '';
-   $CssClass .= $Alt.' ';
-   $CssClass .= $Discussion->Announce == '1' ? ' Announcement' : '';
-   $CssClass .= $Discussion->Dismissed == '1' ? ' Dismissed' : '';
-   $CssClass .= $Discussion->InsertUserID == $Session->UserID ? ' Mine' : '';
-   $CssClass .= ($Discussion->CountUnreadComments > 0 && $Session->IsValid()) ? ' New' : '';
-   $Sender->EventArguments['Discussion'] = &$Discussion;
-   $First = UserBuilder($Discussion, 'First');
-   $Last = UserBuilder($Discussion, 'Last');
-   
-   $Sender->FireEvent('BeforeDiscussionName');
-   
-   $DiscussionName = Gdn_Format::Text($Discussion->Name);
-   if ($DiscussionName == '')
-      $DiscussionName = T('Blank Discussion Topic');
+/**
+ * $Object is either a Comment or the original Discussion.
+ */
+function WriteComment($Object, $Sender, $Session, $CurrentOffset) {
+   $Alt = ($CurrentOffset % 2) != 0;
 
-   static $FirstDiscussion = TRUE;
-   if (!$FirstDiscussion)
-      $Sender->FireEvent('BetweenDiscussion');
-   else
-      $FirstDiscussion = FALSE;
+   $Author = UserBuilder($Object, 'Insert');
+   $Type = property_exists($Object, 'CommentID') ? 'Comment' : 'Discussion';
+	$Sender->EventArguments['Object'] = $Object;
+   $Sender->EventArguments['Type'] = $Type;
+   $Sender->EventArguments['Author'] = $Author;
+   $CssClass = 'Item Comment';
+
+   if (!property_exists($Sender, 'CanEditComments'))
+		$Sender->CanEditComments = $Session->CheckPermission('Vanilla.Comments.Edit', TRUE, 'Category', 'any') && C('Vanilla.AdminCheckboxes.Use');
+		
+
+   $Sender->EventArguments['Comment'] = $Object;   
+   $Id = 'Comment_'.$Object->CommentID;
+   
+   $Sender->EventArguments['CssClass'] = &$CssClass;
+   $Sender->Options = '';
+   $CssClass .= $Object->InsertUserID == $Session->UserID ? ' Mine' : '';
+
+   if ($Alt)
+      $CssClass .= ' Alt';
+   $Alt = !$Alt;
+	
+   $Sender->FireEvent('BeforeCommentDisplay');
 ?>
-<li class="<?php echo $CssClass; ?> pas">
-   <?php
-   $Sender->FireEvent('BeforeDiscussionContent');
-   WriteOptions($Discussion, $Sender, $Session);
-   ?>
-   <div class="ItemContent Discussion">
-      <?php echo Anchor($DiscussionName, '/discussion/'.$Discussion->DiscussionID.'/'.Gdn_Format::Url($Discussion->Name).($Discussion->CountCommentWatch > 0 && C('Vanilla.Comments.AutoOffset') ? '/#Item_'.$Discussion->CountCommentWatch : ''), 'Title'); ?>
-      <?php $Sender->FireEvent('AfterDiscussionTitle'); ?>
+<li class="<?php echo $CssClass; ?>" id="<?php echo $Id; ?>">
+   <div class="Comment">
       <div class="Meta">
-         <?php if ($Discussion->Announce == '1') { ?>
-         <span class="Announcement Count mrs"><?php echo T('Announcement'); ?></span>
-         <?php } ?>
-         <?php if ($Discussion->Closed == '1') { ?>
-         <span class="Closed"><?php echo T('Closed'); ?></span>
-         <?php } ?>
-         <span class="CommentCount"><span class="imgWrap"><i class="Img Sprite Tiny Comments"></i></span><?php printf(Plural($Discussion->CountComments, '%s comment', '%s comments'), $Discussion->CountComments); ?></span>
+         <?php $Sender->FireEvent('BeforeCommentMeta'); ?>
+         <span class="Author">
+            <?php
+            echo UserPhoto($Author);
+            echo UserAnchor($Author);
+            ?>
+         </span>
+         <span class="DateCreated">
+            <?php
+            echo Anchor(Gdn_Format::Date($Object->DateInserted), Gdn_Url::Request() . '#Comment_'.$Object->CommentID, 'Permalink', array('name' => 'Item_'.($CurrentOffset+1), 'rel' => 'nofollow'));
+            ?>
+         </span>
          <?php
-            if ($Session->IsValid() && $Discussion->CountUnreadComments > 0)
-               echo '<strong>'.Plural($Discussion->CountUnreadComments, '%s New', '%s New Plural').'</strong>';
-
-            if ($Discussion->LastCommentID != '') {
-               echo '<span class="LastCommentBy">'.sprintf(T('Most recent by %1$s'), UserAnchor($Last)).'</span>';
-               echo '<span class="LastCommentDate"><span class="mlm imgWrap Tiny"><i class="prm Img Sprite Tiny Time"></i></span>'.Gdn_Format::Date($Discussion->LastDate).'</span>';
-            } else {
-               echo '<span class="LastCommentBy">'.sprintf(T('Started by %1$s'), UserAnchor($First)).'</span>';
-               echo '<span class="LastCommentDate">'.Gdn_Format::Date($Discussion->FirstDate).'</span>';
-            }
+         if ($Source = GetValue('Source', $Object)) {
+            echo sprintf(T('via %s'), T($Source.' Source', $Source));
+         }
          
-            if (C('Vanilla.Categories.Use'))
-               echo Wrap(Anchor($Discussion->Category, '/categories/'.$Discussion->CategoryUrlCode, 'Category'));
-               
-            $Sender->FireEvent('DiscussionMeta');
-         ?>
+			WriteOptionList($Object, $Sender, $Session);
+			?>
+         <div class="CommentInfo">
+            <?php
+            if ($Session->CheckPermission('Garden.Moderation.Manage')) {
+               echo ' '.IPAnchor($Object->InsertIPAddress).' ';
+            }
+
+            $Sender->FireEvent('CommentInfo');
+            ?>
+         </div>
+         <?php $Sender->FireEvent('AfterCommentMeta'); ?>
       </div>
+      <div class="Message">
+			<?php 
+            $Sender->FireEvent('BeforeCommentBody'); 
+			   $Object->FormatBody = Gdn_Format::To($Object->Body, $Object->Format);
+			   $Sender->FireEvent('AfterCommentFormat');
+			   $Object = $Sender->EventArguments['Object'];
+			   echo $Object->FormatBody;
+			?>
+		</div>
+      <?php $Sender->FireEvent('AfterCommentBody'); ?>
    </div>
 </li>
 <?php
+	$Sender->FireEvent('AfterComment');
 }
 
-function WriteFilterTabs(&$Sender) {
-   $Session = Gdn::Session();
-   $Title = property_exists($Sender, 'Category') && is_object($Sender->Category) ? $Sender->Category->Name : T('All Discussions');
-   $Bookmarked = T('My Bookmarks');
-   $MyDiscussions = T('My Discussions');
-   $MyDrafts = T('My Drafts');
-   $CountBookmarks = 0;
-   $CountDiscussions = 0;
-   $CountDrafts = 0;
-   if ($Session->IsValid()) {
-      $CountBookmarks = $Session->User->CountBookmarks;
-      $CountDiscussions = $Session->User->CountDiscussions;
-      $CountDrafts = $Session->User->CountDrafts;
-   }
-   if (is_numeric($CountBookmarks) && $CountBookmarks > 0)
-      $Bookmarked .= '<span>'.$CountBookmarks.'</span>';
+function WriteOptionList($Object, $Sender, $Session) {
+   $EditContentTimeout = C('Garden.EditContentTimeout', -1);
+	$CategoryID = GetValue('CategoryID', $Object);
+	if(!$CategoryID && property_exists($Sender, 'Discussion'))
+		$CategoryID = GetValue('CategoryID', $Sender->Discussion);
+   $PermissionCategoryID = GetValue('PermissionCategoryID', $Object, GetValue('PermissionCategoryID', $Sender->Discussion));
 
-   if (is_numeric($CountDiscussions) && $CountDiscussions > 0)
-      $MyDiscussions .= '<span>'.$CountDiscussions.'</span>';
+	$CanEdit = $EditContentTimeout == -1 || strtotime($Object->DateInserted) + $EditContentTimeout > time();
+	$TimeLeft = '';
+	if ($CanEdit && $EditContentTimeout > 0 && !$Session->CheckPermission('Vanilla.Discussions.Edit', TRUE, 'Category', $PermissionCategoryID)) {
+		$TimeLeft = strtotime($Object->DateInserted) + $EditContentTimeout - time();
+		$TimeLeft = $TimeLeft > 0 ? ' ('.Gdn_Format::Seconds($TimeLeft).')' : '';
+	}
 
-   if (is_numeric($CountDrafts) && $CountDrafts > 0)
-      $MyDrafts .= '<span>'.$CountDrafts.'</span>';
-      
-   ?>
-<div class="Tabs DiscussionsTabs">
-   <ul>
-      <?php $Sender->FireEvent('BeforeDiscussionTabs'); ?>
-      <li<?php echo strtolower($Sender->ControllerName) == 'discussionscontroller' && strtolower($Sender->RequestMethod) == 'index' ? ' class="Active"' : ''; ?>><?php echo Anchor(T('All Discussions'), 'discussions'); ?></li>
-      <?php $Sender->FireEvent('AfterAllDiscussionsTab'); ?>
-      <?php if ($CountBookmarks > 0 || $Sender->RequestMethod == 'bookmarked') { ?>
-      <li<?php echo $Sender->RequestMethod == 'bookmarked' ? ' class="Active"' : ''; ?>><?php echo Anchor($Bookmarked, '/discussions/bookmarked', 'MyBookmarks'); ?></li>
-      <?php
-         $Sender->FireEvent('AfterBookmarksTab');
-      }
-      if ($CountDiscussions > 0 || $Sender->RequestMethod == 'mine') {
-      ?>
-      <li<?php echo $Sender->RequestMethod == 'mine' ? ' class="Active"' : ''; ?>><?php echo Anchor($MyDiscussions, '/discussions/mine', 'MyDiscussions'); ?></li>
-      <?php
-      }
-      if ($CountDrafts > 0 || $Sender->ControllerName == 'draftscontroller') {
-      ?>
-      <li<?php echo $Sender->ControllerName == 'draftscontroller' ? ' class="Active"' : ''; ?>><?php echo Anchor($MyDrafts, '/drafts', 'MyDrafts'); ?></li>
-      <?php
-      }
-      $Sender->FireEvent('AfterDiscussionTabs');
-      ?>
-   </ul>
-   <?php
-   if (property_exists($Sender, 'Category') && is_object($Sender->Category)) {
-      ?>
-      <div class="SubTab">↳ <?php echo $Sender->Category->Name; ?></div>
-      <?php
-   }
-   ?>
-</div>
-   <?php
-}
-
-/**
- * Render options that the user has for this discussion.
- */
-function WriteOptions($Discussion, &$Sender, &$Session) {
-   if ($Session->IsValid() && $Sender->ShowOptions) {
-      echo '<div class="Options floatr">';
-      $Sender->Options = '';
-      
-      // Dismiss an announcement
-      if (C('Vanilla.Discussions.Dismiss', 1) && $Discussion->Announce == '1' && $Discussion->Dismissed != '1')
-         $Sender->Options .= '<li>'.Anchor(T('Dismiss'), 'vanilla/discussion/dismissannouncement/'.$Discussion->DiscussionID.'/'.$Session->TransientKey(), 'DismissAnnouncement') . '</li>';
-      
-      // Edit discussion
-      if ($Discussion->FirstUserID == $Session->UserID || $Session->CheckPermission('Vanilla.Discussions.Edit', TRUE, 'Category', $Discussion->CategoryID))
-         $Sender->Options .= '<li>'.Anchor(T('Edit'), 'vanilla/post/editdiscussion/'.$Discussion->DiscussionID, 'EditDiscussion') . '</li>';
-
-      // Announce discussion
-      if ($Session->CheckPermission('Vanilla.Discussions.Announce', TRUE, 'Category', $Discussion->CategoryID))
-         $Sender->Options .= '<li>'.Anchor(T($Discussion->Announce == '1' ? 'Unannounce' : 'Announce'), 'vanilla/discussion/announce/'.$Discussion->DiscussionID.'/'.$Session->TransientKey(), 'AnnounceDiscussion') . '</li>';
-
-      // Sink discussion
-      if ($Session->CheckPermission('Vanilla.Discussions.Sink', TRUE, 'Category', $Discussion->CategoryID))
-         $Sender->Options .= '<li>'.Anchor(T($Discussion->Sink == '1' ? 'Unsink' : 'Sink'), 'vanilla/discussion/sink/'.$Discussion->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl), 'SinkDiscussion') . '</li>';
-
-      // Close discussion
-      if ($Session->CheckPermission('Vanilla.Discussions.Close', TRUE, 'Category', $Discussion->CategoryID))
-         $Sender->Options .= '<li>'.Anchor(T($Discussion->Closed == '1' ? 'Reopen' : 'Close'), 'vanilla/discussion/close/'.$Discussion->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl), 'CloseDiscussion') . '</li>';
-      
-      // Delete discussion
-      if ($Session->CheckPermission('Vanilla.Discussions.Delete', TRUE, 'Category', $Discussion->CategoryID))
-         $Sender->Options .= '<li>'.Anchor(T('Delete'), 'vanilla/discussion/delete/'.$Discussion->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl), 'DeleteDiscussion') . '</li>';
-      
-      // Allow plugins to add options
-      $Sender->FireEvent('DiscussionOptions');
-      
-      if ($Sender->Options != '') {
-      ?>
-         <ul class="Options Menu UserMenu">
-            <li>
-               <strong><?php echo T('Options'); ?></strong>
-               <ul>
-                  <?php echo $Sender->Options; ?>
-               </ul>
-            </li>
-         </ul>
+   $Sender->Options = '';
+		
+   // Show discussion options if this is the discussion / first comment
+   if ($Sender->EventArguments['Type'] == 'Discussion') {
+      // Can the user edit the discussion?
+      if (($CanEdit && $Session->UserID == $Object->InsertUserID) || $Session->CheckPermission('Vanilla.Discussions.Edit', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T('Edit'), '/vanilla/post/editdiscussion/'.$Object->DiscussionID, 'EditDiscussion').$TimeLeft.'</span>';
          
-      <?php
+      // Can the user announce?
+      if ($Session->CheckPermission('Vanilla.Discussions.Announce', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T($Sender->Discussion->Announce == '1' ? 'Unannounce' : 'Announce'), 'vanilla/discussion/announce/'.$Object->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl), 'AnnounceDiscussion') . '</span>';
+
+      // Can the user sink?
+      if ($Session->CheckPermission('Vanilla.Discussions.Sink', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T($Sender->Discussion->Sink == '1' ? 'Unsink' : 'Sink'), 'vanilla/discussion/sink/'.$Object->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl), 'SinkDiscussion') . '</span>';
+
+      // Can the user close?
+      if ($Session->CheckPermission('Vanilla.Discussions.Close', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T($Sender->Discussion->Closed == '1' ? 'Reopen' : 'Close'), 'vanilla/discussion/close/'.$Object->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl), 'CloseDiscussion') . '</span>';
+      
+      // Can the user delete?
+      if ($Session->CheckPermission('Vanilla.Discussions.Delete', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T('Delete Discussion'), 'vanilla/discussion/delete/'.$Object->DiscussionID.'/'.$Session->TransientKey(), 'DeleteDiscussion') . '</span>';
+   } else {
+      // And if this is just another comment in the discussion ...
+      
+      // Can the user edit the comment?
+      if (($CanEdit && $Session->UserID == $Object->InsertUserID) || $Session->CheckPermission('Vanilla.Comments.Edit', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T('Edit'), '/vanilla/post/editcomment/'.$Object->CommentID, 'EditComment').$TimeLeft.'</span>';
+
+      // Can the user delete the comment?
+      if ($Session->CheckPermission('Vanilla.Comments.Delete', TRUE, 'Category', $PermissionCategoryID))
+         $Sender->Options .= '<span>'.Anchor(T('Delete'), 'vanilla/discussion/deletecomment/'.$Object->CommentID.'/'.$Session->TransientKey().'/?Target='.urlencode(Gdn_Url::Request()), 'DeleteComment') . '</span>';
+   }
+   
+   // Allow plugins to add options
+   $Sender->FireEvent('CommentOptions');
+   echo $Sender->Options;
+
+   if ($Sender->CanEditComments) {
+      if ($Sender->EventArguments['Type'] == 'Comment') {
+         $Id = $Object->CommentID;
+         echo '<div class="Options">';
+         if (!property_exists($Sender, 'CheckedComments'))
+            $Sender->CheckedComments = $Session->GetAttribute('CheckedComments', array());
+
+         $ItemSelected = InSubArray($Id, $Sender->CheckedComments);
+         echo '<span class="AdminCheck"><input type="checkbox" name="'.'Comment'.'ID[]" value="'.$Id.'"'.($ItemSelected?' checked="checked"':'').' /></span>';
+         echo '</div>';
+      } else {
+         echo '<div class="Options">';
+
+         echo '<div class="AdminCheck"><input type="checkbox" name="Toggle"></div>';
+
+         echo '</div>';
       }
-      // Bookmark link
-      $Title = T($Discussion->Bookmarked == '1' ? 'Unbookmark' : 'Bookmark');
-      echo Anchor(
-         '<span class="Star">'
-            .Img('applications/dashboard/design/images/pixel.png', array('alt' => $Title))
-         .'</span>',
-         '/vanilla/discussion/bookmark/'.$Discussion->DiscussionID.'/'.$Session->TransientKey().'?Target='.urlencode($Sender->SelfUrl),
-         'Bookmark' . ($Discussion->Bookmarked == '1' ? ' Bookmarked' : ''),
-         array('title' => $Title)
-      );
-      echo '</div>';
    }
 }

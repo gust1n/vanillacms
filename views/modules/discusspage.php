@@ -1,21 +1,43 @@
-<?php if (!defined('APPLICATION')) exit();  
-   $Session = Gdn::Session();
-   echo '<a name="DiscussThis"></a><h2 class="Discussions bb pbl">' . T('Discussions') . '</h2>'; 
-   
-if (is_object($this->DiscussionData) && $this->DiscussionData->NumRows() > 0) {
-   echo '<ul class="DataList Discussions mbs">';
-   //print_r($this->DiscussionData);
-   
-	   $this->ShowOptions = FALSE;
+<?php if (!defined('APPLICATION')) exit();
+$Session = Gdn::Session();
+$this->FireEvent('BeforeCommentsRender');
 
-	   include($this->FetchViewLocation('discuss_page_discussions', 'vanillacms')); ?>
-   </ul><?php
-} else { ?>
+if (!function_exists('WriteComment')) {
+	include($this->FetchViewLocation('discuss_page_helper_functions', 'vanillacms'));
+} 
+   
+$CurrentOffset = $this->Offset; 
+$CountComments = $this->DiscussionData->NumRows();?>
 
-	   <?php echo '<div class="ptm floatl">' . T('No discussions yet.') . '</div>'; 
-}
-	   if ($Session->IsValid()) {
-   		echo Anchor(T('New Discussion'), 'post/discussion?PageID='.$this->PageID, 'Button bold ptm floatr');
-   	} else {
-   		echo Anchor(T('Sign In'), '/entry/?Target='.urlencode($this->SelfUrl), ''.(C('Garden.SignIn.Popup') ? 'JpPageSignIn SignInPopup Button ptm bold floatr' : ''));
-   	}
+<div class="Tabs HeadingTabs DiscussionTabs <?php echo $PageClass; ?>">
+   <div class="SubTab"><?php echo $CountComments . ' Comments'; ?></div>
+</div>
+<?php
+// Only prints individual comment list items
+$CommentData = $this->DiscussionData->Result();
+
+echo '<ul class="DataList MessageList Discussion '.$PageClass.'">'; 
+	foreach ($CommentData as $Comment) {
+	   ++$CurrentOffset;
+	   $this->CurrentComment = $Comment;
+	   WriteComment($Comment, $this, $Session, $CurrentOffset);
+	}
+echo '</ul>'; ?>
+<div class="MessageForm CommentForm">
+	<div class="Tabs CommentTabs">
+	   <ul>
+	      <li class="Active"><?php echo Anchor(T('Write Comment'), '#', 'WriteButton TabLink'); ?></li>
+	      <?php $this->FireEvent('AfterCommentTabs'); ?>
+	   </ul>
+	</div>
+<?php
+
+   $CommentForm = Gdn::Factory('Form');
+   $CommentForm->SetModel($this->CommentModel);
+   $CommentForm->AddHidden('PageID', $this->PageID);
+	$CommentForm->AddHidden('DiscussionID', $this->DiscussionID);
+   echo $CommentForm->Open(array('class' => ''));
+   echo $CommentForm->TextBox('Body', array('MultiLine' => TRUE, 'value' => ''));
+   echo $CommentForm->Close('Comment');
+?></div>
+   

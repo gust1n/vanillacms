@@ -156,7 +156,7 @@ $ToPanel .= '<input type="submit" id="Form_SaveDraft" name="published" value="'.
 $ToPanel .= '</div>';
 $ToPanel .= '<div class="Box" id="PageAttributes"><h2>' . T('Page Options (optional)') . '</h2>';
 $ToPanel .= $this->Form->CheckBox('InMenu', T('Show in Main Menu'), array('value' => '1')) . '<ul><li class="ParentNotOptional">';
-$ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Discussion'), array('value' => '1')) . '</li><li>';
+$ToPanel .= $this->Form->CheckBox('AllowDiscussion', T('Allow Comments'), array('value' => '1')) . '</li><li>';
 $ToPanel .= $this->Form->Label(T('Parent Page'), 'ParentPageID') . '<select id="Form_ParentPageID" name="Page/ParentPageID" default="-1">';
 $ToPanel .= '<option value="-1" data-url="">'.T('None').'</option>';            
 

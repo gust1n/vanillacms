@@ -2,11 +2,7 @@
 $Session = Gdn::Session();
 
 if($this->Page->AllowDiscussion == 1) {
-   
-   $this->AddAsset('Panel', '<h3><a href="#DiscussThis" class="LargeButton mtm">' . T('Discuss this!') . '</a></h3>');
-   //$DiscussPageModule = new DiscussPageModule;
-
-   $DiscussPageModule = new DiscussPageModule($this, $this->Page->PageID);
+   $DiscussPageModule = new DiscussPageModule($this);
    $this->AddAsset('AfterContent', $DiscussPageModule);
 }
 

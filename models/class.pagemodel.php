@@ -391,7 +391,7 @@ class PageModel extends Gdn_Model {
 	      'DateInserted', 'DateUpdated', 'ParentPageID', 
 	      'InMenu', 'AllowDiscussion', 
 	      'RouteIndex', 'Template', 'Body', 
-	      'Format', 'Sort' 
+	      'Format', 'Sort', 'DiscussionID'
 	      );
 	      
 	   if (in_array($Field, $AvailableFields) && isset($PageID) && isset($Value)) {

@@ -30,6 +30,7 @@ $Construct->PrimaryKey('PageID')
    ->Column('Depth', 'int', TRUE)
 	->Column('InMenu', 'tinyint(1)', '0')
 	->Column('AllowDiscussion', 'tinyint(1)', '0')
+	->Column('DiscussionID', 'int', TRUE, 'key')
 	->Column('RouteIndex', 'varchar(150)', NULL)
 	->Column('Template', 'varchar(100)', 'default')
 	->Column('Body', 'text', TRUE, 'fulltext')
@@ -75,7 +76,6 @@ $Construct->Table('PageMeta')
 // Add PageID column to discussion table for allowing discussions on pages.
 $Construct->Table('Discussion')
    ->Column('PageID', 'int', NULL)
-   ->Column('News', 'tinyint(1)', '0')
    ->Set();
 	
 // Insert some activity types
