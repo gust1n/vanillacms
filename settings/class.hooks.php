@@ -82,14 +82,6 @@ class VanillaCMSHooks implements Gdn_IPlugin {
 		}
    }
 
-	
-
-	// public function ActivityModel_BeforeGetComments_Handler($Sender) {
-	//      echo '<pre>';
-	//      print_r($Sender->EventArguments);
-	//      die('</pre>');
-	//   }
-
    public function Setup() {
       $Database = Gdn::Database();
       $Config = Gdn::Factory(Gdn::AliasConfig);
