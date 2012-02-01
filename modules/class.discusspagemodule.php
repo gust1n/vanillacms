@@ -34,7 +34,9 @@ class DiscussPageModule extends Gdn_Module {
 		if (!isset($this->DiscussionID)) {
 			$FakeFormPostValues = array(
 				'Name' => 'Page Comments to page no' . $this->PageID, 
-				'CategoryID' => 1, 
+				'CategoryID' => -1,
+				'InsertUserID' => 0, //Prevent from being "someones discussion"
+				'UpdateUserID' => 0, //Prevent from being "someones discussion"
 				'Body' => 'This should not be visible, anywhere!', 
 				'Post_Discussion' => 'Post Discussion',
 				'PageID' => $this->PageID
